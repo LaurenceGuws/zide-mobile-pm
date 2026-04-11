@@ -1,6 +1,6 @@
 # Implementation Queue
 
-This is the active queue for `zide-mobile-pm`.
+This is the active queue for the `zide-mobile-pm` repo.
 
 ## Completed
 
@@ -27,7 +27,7 @@ Result:
 - dependency closure is resolved from the package index
 - generated manifest records package index URL/checksum plus each selected
   package URL/version/size/checksum
-- generated output validates with `zide-mobile-pm validate`
+- generated output validates with `zide-pm-admin validate`
 
 Boundary:
 
@@ -68,7 +68,7 @@ Boundary:
 
 Result:
 
-- `android-dev-release` automates the fast dev release lane
+- `android-dev-snapshot-release` automates the fast dev snapshot release lane
 - release lane regenerates the Android dev manifest and prefix archive
 - release manifest rewrites the archive URL to a release-local asset name
 - dry-run mode prepares assets without publishing
@@ -76,13 +76,58 @@ Result:
 
 Boundary:
 
-- dev releases are prereleases
-- dev releases use `termux-main` provider with hardcoded-prefix audit mode
-- formal releases still require product-clean provider policy
+- dev snapshot releases are prereleases
+- dev snapshot releases use `termux-main` provider with hardcoded-prefix audit
+  mode
+- product/official releases still require product-clean provider policy
+
+### MP-A4 zide-pm MVP — met
+
+Result:
+
+- `zide-pm` exists as the user-facing package CLI
+- commands:
+  - `doctor`
+  - `list-available`
+  - `install dev-baseline --prefix <path>`
+- the MVP consumes the Android prefix manifest/archive contract
+- it does not parse `.deb` payloads or provider package internals
+- install writes `.zide-pm-install.json` state into the target prefix
+
+Boundary:
+
+- only `dev-baseline` is supported
+- arbitrary package install/remove/upgrade is not implemented
+- arbitrary package install/remove/upgrade is not implemented
+
+### MP-A5 Android zide-pm Staging — met
+
+Result:
+
+- Android-compatible `zide-pm` binary is produced during dev snapshot release
+  generation
+- dev prefix archives include `usr/bin/zide-pm`
+- dev prefix archives include `usr/.zide-pm-install.json` so `doctor` and
+  `list-available` can work without private GitHub manifest access on-device
+- Note10 validation proves:
+  - `zide-pm help` runs as an Android binary
+  - artifact-staged app prefix includes `zide-pm`
+  - `zide-pm doctor --manifest /no/such/manifest --prefix $PREFIX` works under
+    `run-as dev.zide.terminal`
+  - `zide-pm list-available --manifest /no/such/manifest --prefix $PREFIX`
+    prints `dev-baseline`
+
+Boundary:
+
+- on-device `install dev-baseline` is not claimed yet
+- this proves the product CLI exists in the shell and can report installed
+  package state
 
 ## Current Priority
 
-### MP-A4 Android Product Provider Decision
+### MP-A6 Android Product Provider Decision
+
+## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`
 provider, from a controlled mirror/fork, or from a Zide-owned Android provider.
@@ -95,9 +140,7 @@ Acceptance:
 - `android-prefix-archive` can run with `-hardcoded-policy fail` for the chosen
   product candidate
 
-## Next Tickets
-
-### MP-A3 Zide Consumer Contract
+### MP-A7 Zide Consumer Contract
 
 Acceptance:
 

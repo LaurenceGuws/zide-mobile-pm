@@ -1,6 +1,6 @@
 # zide-mobile-pm
 
-Mobile package and artifact authority for the Zide project family.
+Mobile package authority for the Zide project family.
 
 This repo starts Android-first because Zide's Android terminal needs a real
 app-private Bash/tool userland. The boundary is intentionally broader than
@@ -13,6 +13,9 @@ package model.
 
 This repo owns:
 
+- `zide-pm`, the user-facing mobile package CLI
+- `zide-pm-admin`, the backend/admin tool for manifests, archives, and release
+  publishing
 - mobile artifact manifests
 - provider metadata and trust boundaries
 - bootstrap/package artifact metadata
@@ -47,13 +50,32 @@ The first real consumer is:
 Current CLI surface:
 
 ```bash
-go run ./cmd/zide-mobile-pm help
-go run ./cmd/zide-mobile-pm contract -platform android
-go run ./cmd/zide-mobile-pm android-dev-manifest
-go run ./cmd/zide-mobile-pm android-prefix-archive -hardcoded-policy audit
-go run ./cmd/zide-mobile-pm android-dev-release -dry-run
-go run ./cmd/zide-mobile-pm validate examples/android-dev.manifest.json
+go run ./cmd/zide-pm help
+go run ./cmd/zide-pm doctor
+go run ./cmd/zide-pm list-available
+go run ./cmd/zide-pm install dev-baseline --prefix ./tmp/usr
+
+go run ./cmd/zide-pm-admin help
+go run ./cmd/zide-pm-admin contract -platform android
+go run ./cmd/zide-pm-admin android-dev-manifest
+go run ./cmd/zide-pm-admin android-prefix-archive -hardcoded-policy audit
+go run ./cmd/zide-pm-admin android-dev-snapshot-release -dry-run
+go run ./cmd/zide-pm-admin validate examples/android-dev.manifest.json
 ```
+
+`zide-pm` is the product CLI surface. The MVP supports `doctor`,
+`list-available`, and `install dev-baseline --prefix <path>`. It consumes the
+same manifest/archive contract as Zide and does not parse provider package
+internals.
+
+`zide-pm-admin` is the backend/admin tool. It owns provider snapshotting,
+manifest generation, prefix archive production, validation, and dev snapshot
+publishing. It is not the product shell command.
+
+Android dev prefix archives now include `usr/bin/zide-pm` and an install stamp,
+so `zide-pm doctor` and `zide-pm list-available` work inside the staged
+app-private shell without requiring private GitHub release access from the
+device.
 
 `android-dev-manifest` fetches or reuses the cached Termux main aarch64 package
 index through the `termux-main` provider, verifies the cache checksum, resolves
@@ -66,7 +88,8 @@ writes an archive rooted at `usr/`. Its default `-hardcoded-policy fail` is
 strict; use `-hardcoded-policy audit` only for the current development archive
 while remaining compiled-in Termux prefix hits are still being reviewed.
 
-`android-dev-release` automates the fast development release lane. It generates
+`android-dev-snapshot-release` automates the fast Android development snapshot
+prerelease lane. It generates
 the dev manifest and prefix archive in audit mode, rewrites the release manifest
 so the archive URL is relative to the manifest location, creates a tag, and
 publishes a GitHub prerelease with the generated assets. Use `-dry-run` to
@@ -95,13 +118,19 @@ provider and is currently a dev/bootstrap source, not Zide's product package
 manager. Future providers can include a Zide-owned Android feed, signed mirrors,
 or iOS-safe bundle sources without changing the consumer contract.
 
+`zide-pm` is the product-facing package command intended to run inside the Zide
+shell. Provider commands and release commands are backend machinery beneath
+that UX.
+
 ## Near-Term Plan
 
 1. Decide whether product Android packages come from the current `termux-main`
    provider, a Zide-owned provider, or a controlled mirror/fork.
 2. Remove or formally own remaining compiled-in Termux prefix assumptions for
    product archives.
-3. Add iOS artifact-contract notes only when a concrete iOS consumer exists.
+3. Add real on-device `zide-pm install/remove/upgrade` semantics after the
+   product provider decision.
+4. Add iOS artifact-contract notes only when a concrete iOS consumer exists.
 
 ## Related Projects
 

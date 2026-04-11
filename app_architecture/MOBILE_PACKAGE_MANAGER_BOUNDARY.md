@@ -4,8 +4,8 @@ Purpose: define why `zide-mobile-pm` exists and where it stops.
 
 ## Product Role
 
-`zide-mobile-pm` is the mobile artifact producer and trust-metadata authority
-for the Zide project family.
+`zide-mobile-pm` is the mobile package authority and repo identity for the Zide
+project family.
 
 It is used by Zide, but it should remain portable enough to support other
 Zide-family mobile consumers that need the same artifact discipline.
@@ -14,6 +14,8 @@ Zide-family mobile consumers that need the same artifact discipline.
 
 `zide-mobile-pm` owns:
 
+- the `zide-pm` package CLI
+- the `zide-pm-admin` backend/admin tool
 - artifact manifests
 - provider metadata and trust boundaries
 - package/bootstrap metadata
@@ -67,6 +69,20 @@ Provider outputs must become Zide artifact contracts before Zide consumes them.
 That keeps Android-specific mechanics out of the Zide runtime and leaves room
 for a future Zide-owned Android feed or completely different iOS artifact
 sources.
+
+## Package CLI
+
+`zide-pm` is the product-facing command intended for Zide mobile shells.
+
+It consumes artifact contracts and reports provider provenance. It must not make
+Termux, apt, or any future provider look like the Zide product surface.
+
+`zide-pm-admin` is not a product shell command. It is host-side/admin tooling
+for validation, provider snapshotting, archive generation, and snapshot
+publishing.
+
+The current MVP is `dev-baseline` only. Arbitrary package install, upgrade, and
+remove semantics are later work.
 
 ## iOS Later
 

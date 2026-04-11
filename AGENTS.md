@@ -1,6 +1,15 @@
 # Agent Workflow (zide-mobile-pm)
 
-This repo is artifact-authority infrastructure for Zide mobile products.
+This repo is the mobile package authority for Zide-family products.
+
+Naming and ownership are strict:
+
+- `zide-pm` is the product-facing package CLI.
+- `zide-pm-admin` is the backend/admin tool.
+- `zide-mobile-pm` is the repo/module/project identity.
+- Android dev publishing is a snapshot prerelease lane, not an official product
+  release lane.
+- Do not blur product CLI semantics with provider/admin tooling.
 
 Default workflow:
 
@@ -12,7 +21,7 @@ Default workflow:
 5. Update docs with any behavior or boundary change.
 6. Run local validation before reporting completion:
    - `go test ./...`
-   - `go run ./cmd/zide-mobile-pm validate examples/android-dev.manifest.json`
+   - `go run ./cmd/zide-pm-admin validate examples/android-dev.manifest.json`
 
 Rules:
 
@@ -20,9 +29,10 @@ Rules:
 - Do not put Android UI/lifecycle code here.
 - Do not claim unmodified `com.termux` package payloads are product-correct for
   `dev.zide.terminal`.
-- Do not invent a new mobile package manager when a pinned artifact contract is
-  enough.
+- Do not treat provider internals as the Zide product surface.
+- Do not describe dev snapshot prereleases as product/official releases.
+- Do not let docs or commands imply that `zide-pm-admin` is the user-facing
+  shell command; that role belongs to `zide-pm`.
 - Do not pretend iOS and Android have the same execution model.
 - Generated artifacts belong under `dist/` and are not committed by default.
 - Download/cache material belongs under `.cache/` and is not committed.
-
