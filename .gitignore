@@ -1,0 +1,6 @@
+.cache/
+dist/
+tmp/
+*.log
+*.test
+
