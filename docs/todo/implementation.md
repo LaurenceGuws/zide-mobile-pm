@@ -64,6 +64,22 @@ Boundary:
 - product archive work must either remove those hits, own a forked package feed,
   or document a narrower approved runtime surface
 
+### MP-A3 Android Dev Release Lane — met
+
+Result:
+
+- `android-dev-release` automates the fast dev release lane
+- release lane regenerates the Android dev manifest and prefix archive
+- release manifest rewrites the archive URL to a release-local asset name
+- dry-run mode prepares assets without publishing
+- non-dry-run mode creates a tag and GitHub prerelease with generated assets
+
+Boundary:
+
+- dev releases are prereleases
+- dev releases use `termux-main` provider with hardcoded-prefix audit mode
+- formal releases still require product-clean provider policy
+
 ## Current Priority
 
 ### MP-A4 Android Product Provider Decision

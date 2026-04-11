@@ -51,6 +51,7 @@ go run ./cmd/zide-mobile-pm help
 go run ./cmd/zide-mobile-pm contract -platform android
 go run ./cmd/zide-mobile-pm android-dev-manifest
 go run ./cmd/zide-mobile-pm android-prefix-archive -hardcoded-policy audit
+go run ./cmd/zide-mobile-pm android-dev-release -dry-run
 go run ./cmd/zide-mobile-pm validate examples/android-dev.manifest.json
 ```
 
@@ -64,6 +65,12 @@ pinned `.deb` payloads, extracts only `data/data/com.termux/files/usr/*`, and
 writes an archive rooted at `usr/`. Its default `-hardcoded-policy fail` is
 strict; use `-hardcoded-policy audit` only for the current development archive
 while remaining compiled-in Termux prefix hits are still being reviewed.
+
+`android-dev-release` automates the fast development release lane. It generates
+the dev manifest and prefix archive in audit mode, rewrites the release manifest
+so the archive URL is relative to the manifest location, creates a tag, and
+publishes a GitHub prerelease with the generated assets. Use `-dry-run` to
+prepare assets without publishing.
 
 ## Design Rule
 

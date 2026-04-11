@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -45,6 +46,10 @@ func main() {
 		if err := androidPrefixArchive(os.Args[2:]); err != nil {
 			die(err)
 		}
+	case "android-dev-release":
+		if err := androidDevRelease(os.Args[2:]); err != nil {
+			die(err)
+		}
 	case "validate":
 		if err := validate(os.Args[2:]); err != nil {
 			die(err)
@@ -65,6 +70,8 @@ Commands:
              Fetch/cache Android package metadata and emit a pinned dev manifest.
   android-prefix-archive
              Build a dev Android prefix archive from a pinned dev manifest.
+  android-dev-release
+             Publish a fast Android dev prerelease with generated artifacts.
   contract   Print the current artifact contract skeleton as JSON.
   validate   Validate a manifest JSON file against the current schema floor.
   version    Print the tool version.
@@ -114,6 +121,106 @@ func androidDevManifest(args []string) error {
 	if *out != "-" {
 		fmt.Printf("wrote %s packages=%d index_cache=%s\n", *out, len(packages), indexPath)
 	}
+	return nil
+}
+
+func androidDevRelease(args []string) error {
+	fs := flag.NewFlagSet("android-dev-release", flag.ExitOnError)
+	tag := fs.String("tag", defaultAndroidDevTag(), "release tag to create")
+	title := fs.String("title", "", "release title, defaults to tag")
+	refresh := fs.Bool("refresh", false, "refresh provider package index before release")
+	dryRun := fs.Bool("dry-run", false, "generate assets and print release command without publishing")
+	repo := fs.String("repo", "LaurenceGuws/zide-mobile-pm", "GitHub repository for release publishing")
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+	if strings.TrimSpace(*tag) == "" {
+		return fmt.Errorf("tag must not be empty")
+	}
+	releaseTitle := *title
+	if releaseTitle == "" {
+		releaseTitle = *tag
+	}
+
+	devManifestPath := "dist/android-dev.manifest.json"
+	prefixArchivePath := "dist/zide-android-dev-prefix.tar.gz"
+	prefixManifestPath := "dist/android-dev-prefix.manifest.json"
+	auditPath := "dist/zide-android-dev-prefix.audit.json"
+	releaseManifestPath := "dist/android-dev-prefix.release.manifest.json"
+
+	manifestArgs := []string{
+		"-out", devManifestPath,
+	}
+	if *refresh {
+		manifestArgs = append(manifestArgs, "-refresh")
+	}
+	if err := androidDevManifest(manifestArgs); err != nil {
+		return err
+	}
+	if err := androidPrefixArchive([]string{
+		"-manifest", devManifestPath,
+		"-out", prefixArchivePath,
+		"-out-manifest", prefixManifestPath,
+		"-audit-out", auditPath,
+		"-hardcoded-policy", "audit",
+	}); err != nil {
+		return err
+	}
+	if err := writeReleaseManifest(prefixManifestPath, releaseManifestPath, filepath.Base(prefixArchivePath)); err != nil {
+		return err
+	}
+	if err := manifestPathValid(releaseManifestPath); err != nil {
+		return err
+	}
+
+	body := androidDevReleaseBody(*tag, releaseManifestPath, auditPath)
+	bodyPath := filepath.Join("dist", *tag+".release-notes.md")
+	if err := os.WriteFile(bodyPath, []byte(body), 0o644); err != nil {
+		return err
+	}
+
+	assetArgs := []string{
+		releaseManifestPath,
+		devManifestPath,
+		prefixArchivePath,
+		auditPath,
+	}
+	fmt.Printf("prepared android dev release tag=%s manifest=%s archive=%s\n", *tag, releaseManifestPath, prefixArchivePath)
+	if *dryRun {
+		fmt.Printf("dry-run: git tag %s\n", *tag)
+		fmt.Printf("dry-run: git push origin %s\n", *tag)
+		fmt.Printf("dry-run: gh release create %s %s --repo %s --title %q --notes-file %s --prerelease\n",
+			*tag,
+			strings.Join(assetArgs, " "),
+			*repo,
+			releaseTitle,
+			bodyPath,
+		)
+		return nil
+	}
+
+	if err := ensureCleanWorktree(); err != nil {
+		return err
+	}
+	if err := runCommand("git", "tag", "--annotate", *tag, "--message", releaseTitle); err != nil {
+		return err
+	}
+	if err := runCommand("git", "push", "origin", *tag); err != nil {
+		return err
+	}
+	argsForGH := []string{
+		"release", "create", *tag,
+		"--repo", *repo,
+		"--title", releaseTitle,
+		"--notes-file", bodyPath,
+		"--prerelease",
+	}
+	argsForGH = append(argsForGH, assetArgs...)
+	if err := runCommand("gh", argsForGH...); err != nil {
+		return err
+	}
+	fmt.Printf("published https://github.com/%s/releases/tag/%s\n", *repo, *tag)
+	fmt.Printf("consumer manifest URL: https://github.com/%s/releases/download/%s/%s\n", *repo, *tag, filepath.Base(releaseManifestPath))
 	return nil
 }
 
@@ -256,6 +363,79 @@ func validate(args []string) error {
 	}
 	fmt.Printf("ok platform=%s channel=%s artifacts=%d\n", doc.Platform, doc.Channel, len(doc.Artifacts))
 	return nil
+}
+
+func writeReleaseManifest(inputPath string, outputPath string, archiveAssetName string) error {
+	doc, err := manifest.Load(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := doc.Validate(); err != nil {
+		return err
+	}
+	for i := range doc.Artifacts {
+		if doc.Artifacts[i].Kind == "android-prefix-archive" {
+			doc.Artifacts[i].URL = archiveAssetName
+		}
+	}
+	doc.Notes = append(doc.Notes, "Artifact URLs in this release manifest are relative to the manifest location.")
+	return writeManifest(outputPath, doc)
+}
+
+func manifestPathValid(path string) error {
+	doc, err := manifest.Load(path)
+	if err != nil {
+		return err
+	}
+	return doc.Validate()
+}
+
+func androidDevReleaseBody(tag string, manifestPath string, auditPath string) string {
+	return fmt.Sprintf(`# %s
+
+Automated Android development artifact release.
+
+This release is for Zide Android terminal bringup and device testing. It is not
+a formal product userland release.
+
+Assets:
+
+- %s
+- android-dev.manifest.json
+- zide-android-dev-prefix.tar.gz
+- %s
+
+Policy:
+
+- provider: termux-main
+- provider role: android-dev-bootstrap
+- hardcoded prefix policy: audit
+- product releases must pass the stricter hardcoded-prefix policy before being
+  treated as product-clean
+`, tag, filepath.Base(manifestPath), filepath.Base(auditPath))
+}
+
+func defaultAndroidDevTag() string {
+	return "android-dev-" + time.Now().UTC().Format("2006.01.02.150405")
+}
+
+func ensureCleanWorktree() error {
+	output, err := exec.Command("git", "status", "--porcelain").Output()
+	if err != nil {
+		return err
+	}
+	if strings.TrimSpace(string(output)) != "" {
+		return fmt.Errorf("worktree must be clean before publishing a release")
+	}
+	return nil
+}
+
+func runCommand(name string, args ...string) error {
+	cmd := exec.Command(name, args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	return cmd.Run()
 }
 
 type prefixAudit struct {
