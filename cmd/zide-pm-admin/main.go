@@ -88,7 +88,7 @@ func androidDevManifest(args []string) error {
 	out := fs.String("out", "dist/android-dev.manifest.json", "output manifest path, or - for stdout")
 	indexURL := fs.String("index-url", androidrepo.DefaultIndexURL, "Android package index URL")
 	baseURL := fs.String("base-url", androidrepo.DefaultBaseURL, "base URL for package filenames")
-	roots := fs.String("packages", "bash,neovim,htop,gotop", "comma-separated root packages for the dev channel")
+	roots := fs.String("packages", "bash,neovim,git,ripgrep,htop,gotop", "comma-separated root packages for the dev channel")
 	refresh := fs.Bool("refresh", false, "refresh the cached package index")
 	if err := fs.Parse(args); err != nil {
 		return err

@@ -55,7 +55,7 @@ Commands:
   help            Show this help.
 
 Current MVP package:
-  dev-baseline    Bash + Neovim + htop + gotop development baseline.
+  dev-baseline    Bash + Neovim + Git + ripgrep + htop + gotop baseline.
 
 Examples:
   zide-pm doctor

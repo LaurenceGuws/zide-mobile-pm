@@ -42,6 +42,8 @@ Current `dev-baseline` means:
 
 - Bash
 - Neovim
+- Git
+- ripgrep
 - htop
 - gotop
 - their pinned provider dependency closure

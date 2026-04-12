@@ -23,7 +23,7 @@ Result:
   under `.cache/`
 - generated artifacts record provider provenance metadata
 - cache checksum is written and verified on reuse
-- default roots are `bash,neovim,htop,gotop`
+- default roots are `bash,neovim,git,ripgrep,htop,gotop`
 - dependency closure is resolved from the package index
 - generated manifest records package index URL/checksum plus each selected
   package URL/version/size/checksum

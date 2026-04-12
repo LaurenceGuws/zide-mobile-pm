@@ -24,7 +24,8 @@ Provider id: `termux-main`
 Role:
 
 - Android development/bootstrap source
-- useful for Bash, Neovim, htop, gotop, and dependency closure experiments
+- useful for Bash, Neovim, Git, ripgrep, htop/gotop, and dependency closure
+  experiments
 - not automatically product-clean for `dev.zide.terminal`
 
 Trust boundary:
