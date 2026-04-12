@@ -29,6 +29,7 @@ type ExtractStats struct {
 	Hardlinks           int
 	Skipped             int
 	TextRewrites        int
+	BinaryRewrites      int
 	HardcodedTermuxHits []string
 }
 
@@ -164,8 +165,11 @@ func extractUSR(reader io.Reader, stagingRoot string) (ExtractStats, error) {
 			if err != nil {
 				return stats, err
 			}
-			rewritten, changed, binaryHit := rewriteTermuxBytes(relative, bytes)
-			if changed {
+			rewritten, textChanged, binaryRewrites, binaryHit := rewriteTermuxBytes(relative, bytes)
+			if binaryRewrites > 0 {
+				stats.BinaryRewrites += binaryRewrites
+			}
+			if textChanged {
 				stats.TextRewrites++
 			}
 			if binaryHit {
@@ -235,16 +239,72 @@ func usrRelativePath(raw string) (string, bool) {
 	return "", false
 }
 
-func rewriteTermuxBytes(relative string, payload []byte) ([]byte, bool, bool) {
+func rewriteTermuxBytes(relative string, payload []byte) ([]byte, bool, int, bool) {
 	oldPrefix := []byte("/data/data/com.termux/files/usr")
 	if !bytes.Contains(payload, oldPrefix) {
-		return payload, false, false
+		return payload, false, 0, false
 	}
 	if !looksText(payload) {
-		return payload, false, true
+		rewritten, rewrites := rewriteKnownBinaryTermuxPaths(payload)
+		return rewritten, false, rewrites, bytes.Contains(rewritten, oldPrefix)
 	}
 	rewritten := bytes.ReplaceAll(payload, oldPrefix, []byte("/data/data/dev.zide.terminal/files/usr"))
-	return rewritten, true, false
+	return rewritten, true, 0, false
+}
+
+func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
+	rewritten := append([]byte(nil), payload...)
+	rewrites := 0
+	for _, replacement := range []struct {
+		old string
+		new string
+	}{
+		{
+			old: "/data/data/com.termux/files/usr/etc/bash.bashrc",
+			new: "/data/user/0/dev.zide.terminal/tmp/bash.bashrc",
+		},
+		{
+			old: "/data/data/com.termux/files/usr/etc/profile",
+			new: "/data/user/0/dev.zide.terminal/tmp/profile",
+		},
+		{
+			old: "/data/data/com.termux/files/usr/etc/hosts",
+			new: "/data/user/0/dev.zide.terminal/tmp/hosts",
+		},
+		{
+			old: "/data/data/com.termux/files/usr/var/htop/stat",
+			new: "/data/user/0/dev.zide.terminal/tmp/htop/stat",
+		},
+	} {
+		next, changed := replaceFixedWidthCString(rewritten, []byte(replacement.old), []byte(replacement.new))
+		if changed {
+			rewrites++
+			rewritten = next
+		}
+	}
+	return rewritten, rewrites
+}
+
+func replaceFixedWidthCString(payload []byte, old []byte, new []byte) ([]byte, bool) {
+	if len(new) > len(old) {
+		return payload, false
+	}
+	changed := false
+	searchFrom := 0
+	for {
+		index := bytes.Index(payload[searchFrom:], old)
+		if index < 0 {
+			break
+		}
+		start := searchFrom + index
+		copy(payload[start:start+len(new)], new)
+		for i := start + len(new); i < start+len(old); i++ {
+			payload[i] = 0
+		}
+		searchFrom = start + len(old)
+		changed = true
+	}
+	return payload, changed
 }
 
 func rewriteTermuxLink(relative string, linkname string) (string, bool) {

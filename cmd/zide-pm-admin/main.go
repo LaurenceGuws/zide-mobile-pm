@@ -294,6 +294,7 @@ func androidPrefixArchive(args []string) error {
 		audit.ExtractedHardlinks += stats.Hardlinks
 		audit.SkippedEntries += stats.Skipped
 		audit.TextRewrites += stats.TextRewrites
+		audit.BinaryRewrites += stats.BinaryRewrites
 		for _, hit := range stats.HardcodedTermuxHits {
 			audit.HardcodedTermuxHits = append(audit.HardcodedTermuxHits, artifact.Name+":"+hit)
 		}
@@ -329,11 +330,13 @@ func androidPrefixArchive(args []string) error {
 		return err
 	}
 	fmt.Printf(
-		"wrote %s files=%d symlinks=%d packages=%d hardcoded_termux_hits=%d manifest=%s audit=%s\n",
+		"wrote %s files=%d symlinks=%d packages=%d text_rewrites=%d binary_rewrites=%d hardcoded_termux_hits=%d manifest=%s audit=%s\n",
 		*out,
 		archiveStats.Files,
 		archiveStats.Symlinks,
 		len(debArtifacts),
+		audit.TextRewrites,
+		audit.BinaryRewrites,
 		len(audit.HardcodedTermuxHits),
 		*outManifest,
 		*auditOut,
@@ -462,6 +465,7 @@ type prefixAudit struct {
 	ExtractedHardlinks  int      `json:"extracted_hardlinks"`
 	SkippedEntries      int      `json:"skipped_entries"`
 	TextRewrites        int      `json:"text_rewrites"`
+	BinaryRewrites      int      `json:"binary_rewrites"`
 	HardcodedTermuxHits []string `json:"hardcoded_termux_hits,omitempty"`
 	ArchivePath         string   `json:"archive_path"`
 	ArchiveSHA256       string   `json:"archive_sha256"`
@@ -661,6 +665,9 @@ func newAndroidPrefixManifest(
 				"hardcoded_termux_hits":   fmt.Sprintf("%d", len(audit.HardcodedTermuxHits)),
 				"hardcoded_termux_policy": audit.HardcodedPolicy,
 				"text_rewrites":           fmt.Sprintf("%d", audit.TextRewrites),
+				"binary_rewrites":         fmt.Sprintf("%d", audit.BinaryRewrites),
+				"runtime_support_files":   "/data/user/0/dev.zide.terminal/tmp/bash.bashrc,/data/user/0/dev.zide.terminal/tmp/profile,/data/user/0/dev.zide.terminal/tmp/hosts,/data/user/0/dev.zide.terminal/tmp/htop/stat",
+				"runtime_support_links":   "/data/user/0/dev.zide.terminal/tmp/bash.bashrc=>/data/user/0/dev.zide.terminal/files/usr/etc/bash.bashrc,/data/user/0/dev.zide.terminal/tmp/profile=>/data/user/0/dev.zide.terminal/files/usr/etc/profile,/data/user/0/dev.zide.terminal/tmp/hosts=>/data/user/0/dev.zide.terminal/files/usr/etc/hosts,/data/user/0/dev.zide.terminal/tmp/htop/stat=>/data/user/0/dev.zide.terminal/files/usr/var/htop/stat",
 				"extracted_regular_files": fmt.Sprintf("%d", audit.ExtractedFiles),
 				"extracted_symlinks":      fmt.Sprintf("%d", audit.ExtractedSymlinks),
 				"archive_regular_files":   fmt.Sprintf("%d", archiveStats.Files),

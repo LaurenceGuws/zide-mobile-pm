@@ -50,6 +50,12 @@ Result:
 - output archive is rooted at `usr/` for staging under Android app files
 - text files and symlink targets that contain the old Termux prefix are
   rewritten to the Zide app prefix where safe
+- known compiled Bash/htop provider paths are rewritten as fixed-width
+  C-strings and counted separately as binary rewrites
+- runtime support files required by those binary rewrites are advertised in
+  archive metadata for the app consumer to materialize
+- runtime support symlinks are advertised so shortened binary paths can point
+  back at archived prefix files without making Zide parse provider internals
 - archive checksum and size are emitted into
   `dist/android-dev-prefix.manifest.json`
 - audit metadata is emitted into `dist/zide-android-dev-prefix.audit.json`
@@ -59,7 +65,7 @@ Result:
 Boundary:
 
 - the current upstream package set still contains compiled-in `com.termux`
-  prefix hits
+  prefix hits outside the known rewritten Bash/htop paths
 - audit mode is acceptable for development artifact production only
 - product archive work must either remove those hits, own a forked package feed,
   or document a narrower approved runtime surface

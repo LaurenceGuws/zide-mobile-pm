@@ -90,7 +90,9 @@ pinned package metadata to `dist/android-dev.manifest.json`.
 pinned `.deb` payloads, extracts only `data/data/com.termux/files/usr/*`, and
 writes an archive rooted at `usr/`. Its default `-hardcoded-policy fail` is
 strict; use `-hardcoded-policy audit` only for the current development archive
-while remaining compiled-in Termux prefix hits are still being reviewed.
+while remaining compiled-in Termux prefix hits are still being reviewed. Known
+compiled provider paths may be rewritten only through explicit fixed-width
+binary rules, and those rewrites are reported separately from text rewrites.
 
 `android-dev-snapshot-release` automates the fast Android development snapshot
 prerelease lane. It generates

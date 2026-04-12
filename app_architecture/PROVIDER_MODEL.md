@@ -39,6 +39,8 @@ Known limitation:
 - upstream payloads may contain compiled-in `/data/data/com.termux/files/usr`
   assumptions
 - product archives must remove, replace, or deliberately own those assumptions
+- known fixed-width binary strings may be rewritten only when the replacement
+  is explicit, app-owned, and recorded in artifact audit metadata
 
 ## Provider Metadata
 

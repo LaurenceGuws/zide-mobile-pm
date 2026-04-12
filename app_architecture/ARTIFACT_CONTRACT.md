@@ -94,10 +94,21 @@ Initial Android metadata keys:
 - `hardcoded_termux_hits`
 - `hardcoded_termux_policy`
 - `text_rewrites`
+- `binary_rewrites`
+- `runtime_support_files`
+- `runtime_support_links`
 
 `hardcoded_termux_policy=fail` is the product-clean default. Development
 archives may use `audit` only when the emitted audit file is treated as a real
 blocker list, not as compatibility debt to ignore.
+
+`text_rewrites` counts safe text/symlink prefix rewrites. `binary_rewrites`
+counts explicit fixed-width C-string rewrites for known compiled provider paths.
+Unknown compiled `com.termux` paths must stay in `hardcoded_termux_hits`.
+`runtime_support_files` lists app-owned files the consumer must materialize
+outside the `usr/` archive root for those known binary rewrites.
+`runtime_support_links` lists `source=>target` symlinks that let shortened
+runtime paths point back at files staged from the archive.
 
 ## iOS Initial Kinds
 

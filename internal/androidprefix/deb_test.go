@@ -12,7 +12,7 @@ import (
 
 func TestExtractDebUSRRewritesPrefixPaths(t *testing.T) {
 	debPath := filepath.Join(t.TempDir(), "sample.deb")
-	if err := writeSampleDeb(debPath); err != nil {
+	if err := writeSampleDeb(debPath, sampleDebEntries()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -50,21 +50,87 @@ func TestExtractDebUSRRewritesPrefixPaths(t *testing.T) {
 	}
 }
 
-func writeSampleDeb(path string) error {
+func TestExtractDebUSRRewritesKnownBinaryTermuxPaths(t *testing.T) {
+	debPath := filepath.Join(t.TempDir(), "sample.deb")
+	body := append([]byte{0x7f, 'E', 'L', 'F', 0}, []byte("/data/data/com.termux/files/usr/var/htop/stat")...)
+	body = append(body, 0, 1, 2, 3)
+	if err := writeSampleDeb(debPath, []sampleDebEntry{{
+		name:     "data/data/com.termux/files/usr/bin/htop",
+		mode:     0o755,
+		body:     body,
+		typeflag: tar.TypeReg,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+
+	stagingRoot := t.TempDir()
+	stats, err := ExtractDebUSR(debPath, stagingRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.BinaryRewrites != 1 {
+		t.Fatalf("binary rewrites=%d want=1", stats.BinaryRewrites)
+	}
+	if len(stats.HardcodedTermuxHits) != 0 {
+		t.Fatalf("unexpected hardcoded hits: %v", stats.HardcodedTermuxHits)
+	}
+
+	rewritten, err := os.ReadFile(filepath.Join(stagingRoot, "usr/bin/htop"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(rewritten, []byte("/data/data/com.termux/files/usr/var/htop/stat")) {
+		t.Fatalf("old htop path remained in binary payload: %q", rewritten)
+	}
+	if !bytes.Contains(rewritten, []byte("/data/user/0/dev.zide.terminal/tmp/htop/stat")) {
+		t.Fatalf("new htop path missing from binary payload: %q", rewritten)
+	}
+}
+
+func TestExtractDebUSRAuditsUnknownBinaryTermuxPaths(t *testing.T) {
+	debPath := filepath.Join(t.TempDir(), "sample.deb")
+	body := append([]byte{0x7f, 'E', 'L', 'F', 0}, []byte("/data/data/com.termux/files/usr/lib/unknown")...)
+	if err := writeSampleDeb(debPath, []sampleDebEntry{{
+		name:     "data/data/com.termux/files/usr/bin/unknown",
+		mode:     0o755,
+		body:     body,
+		typeflag: tar.TypeReg,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+
+	stats, err := ExtractDebUSR(debPath, t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.BinaryRewrites != 0 {
+		t.Fatalf("binary rewrites=%d want=0", stats.BinaryRewrites)
+	}
+	if got, want := stats.HardcodedTermuxHits, []string{"usr/bin/unknown"}; len(got) != len(want) || got[0] != want[0] {
+		t.Fatalf("hardcoded hits=%v want=%v", got, want)
+	}
+}
+
+type sampleDebEntry struct {
+	name     string
+	mode     int64
+	body     []byte
+	linkname string
+	typeflag byte
+}
+
+func sampleDebEntries() []sampleDebEntry {
+	return []sampleDebEntry{
+		{name: "data/data/com.termux/files/usr/bin/", mode: 0o755, typeflag: tar.TypeDir},
+		{name: "data/data/com.termux/files/usr/bin/sample", mode: 0o755, body: []byte("/data/data/com.termux/files/usr/bin\n"), typeflag: tar.TypeReg},
+		{name: "data/data/com.termux/files/usr/bin/sample-link", mode: 0o777, linkname: "/data/data/com.termux/files/usr/bin/sample", typeflag: tar.TypeSymlink},
+	}
+}
+
+func writeSampleDeb(path string, entries []sampleDebEntry) error {
 	var tarPayload bytes.Buffer
 	gzipWriter := gzip.NewWriter(&tarPayload)
 	tarWriter := tar.NewWriter(gzipWriter)
-	entries := []struct {
-		name     string
-		mode     int64
-		body     string
-		linkname string
-		typeflag byte
-	}{
-		{name: "data/data/com.termux/files/usr/bin/", mode: 0o755, typeflag: tar.TypeDir},
-		{name: "data/data/com.termux/files/usr/bin/sample", mode: 0o755, body: "/data/data/com.termux/files/usr/bin\n", typeflag: tar.TypeReg},
-		{name: "data/data/com.termux/files/usr/bin/sample-link", mode: 0o777, linkname: "/data/data/com.termux/files/usr/bin/sample", typeflag: tar.TypeSymlink},
-	}
 	for _, entry := range entries {
 		header := &tar.Header{
 			Name:     entry.name,
@@ -76,8 +142,8 @@ func writeSampleDeb(path string) error {
 		if err := tarWriter.WriteHeader(header); err != nil {
 			return err
 		}
-		if entry.body != "" {
-			if _, err := tarWriter.Write([]byte(entry.body)); err != nil {
+		if len(entry.body) > 0 {
+			if _, err := tarWriter.Write(entry.body); err != nil {
 				return err
 			}
 		}
