@@ -97,6 +97,7 @@ Result:
 Boundary:
 
 - only `dev-baseline` is supported
+- `dev-baseline` is current MVP/bootstrap naming, not settled product naming
 - arbitrary package install/remove/upgrade is not implemented
 - arbitrary package install/remove/upgrade is not implemented
 

@@ -68,6 +68,10 @@ go run ./cmd/zide-pm-admin validate examples/android-dev.manifest.json
 same manifest/archive contract as Zide and does not parse provider package
 internals.
 
+`dev-baseline` is current bringup naming for the first bootstrap/recommended
+profile. It should not be treated as the final long-term product name for
+onboarding/default package policy.
+
 `zide-pm-admin` is the backend/admin tool. It owns provider snapshotting,
 manifest generation, prefix archive production, validation, and dev snapshot
 publishing. It is not the product shell command.

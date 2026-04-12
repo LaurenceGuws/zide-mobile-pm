@@ -34,7 +34,7 @@ Commands:
 - `zide-pm list-available`
 - `zide-pm install dev-baseline --prefix <path>`
 
-Initial package group:
+Initial bootstrap profile:
 
 - `dev-baseline`
 
@@ -45,6 +45,18 @@ Current `dev-baseline` means:
 - htop
 - gotop
 - their pinned provider dependency closure
+
+This is current bringup naming, not long-term product semantics.
+
+The intended product direction is:
+
+- APK/app releases can point at a compatible bootstrap or recommended profile
+- installed packages later evolve under `zide-pm`
+- default shell may initially be Bash, but shell choice should remain
+  configurable userland policy rather than APK identity
+- future naming should move from `dev-baseline` toward product language such as
+  `recommended`, `terminal-baseline`, or similar once the onboarding/install
+  model is mature enough
 
 ## Boundary
 
@@ -61,6 +73,9 @@ The user-facing CLI should not expose Termux as the product. It can report
 
 The Android MVP installs an `android-prefix-archive` rooted at `usr/` into the
 requested prefix.
+
+That archive should currently be read as a bootstrap/recommended profile
+artifact, not as a forever lock on package versions for the life of the APK.
 
 For the current app:
 
@@ -104,6 +119,7 @@ Do not claim these are done:
 - upgrade/remove semantics
 - product-clean provider policy
 - iOS execution/install behavior
+- stable long-term product naming for bootstrap/recommended profiles
 
 Those need separate tickets after the first CLI shape is validated in the Zide
 Android shell.
