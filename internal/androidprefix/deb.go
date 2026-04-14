@@ -19,6 +19,9 @@ import (
 const (
 	TermuxUSRPrefix = "data/data/com.termux/files/usr/"
 	ZideUSRPrefix   = "usr/"
+	AppPackageName  = "uk.laurencegouws.zide"
+	AppUSRPath      = "/data/data/" + AppPackageName + "/files/usr"
+	RuntimeAliasDir = "/data/user/0/" + AppPackageName + "/t"
 )
 
 type ExtractStats struct {
@@ -248,7 +251,7 @@ func rewriteTermuxBytes(relative string, payload []byte) ([]byte, bool, int, boo
 		rewritten, rewrites := rewriteKnownBinaryTermuxPaths(payload)
 		return rewritten, false, rewrites, bytes.Contains(rewritten, oldPrefix)
 	}
-	rewritten := bytes.ReplaceAll(payload, oldPrefix, []byte("/data/data/dev.zide.terminal/files/usr"))
+	rewritten := bytes.ReplaceAll(payload, oldPrefix, []byte(AppUSRPath))
 	return rewritten, true, 0, false
 }
 
@@ -261,19 +264,19 @@ func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 	}{
 		{
 			old: "/data/data/com.termux/files/usr/etc/bash.bashrc",
-			new: "/data/user/0/dev.zide.terminal/tmp/bash.bashrc",
+			new: RuntimeAliasDir + "/b",
 		},
 		{
 			old: "/data/data/com.termux/files/usr/etc/profile",
-			new: "/data/user/0/dev.zide.terminal/tmp/profile",
+			new: RuntimeAliasDir + "/p",
 		},
 		{
 			old: "/data/data/com.termux/files/usr/etc/hosts",
-			new: "/data/user/0/dev.zide.terminal/tmp/hosts",
+			new: RuntimeAliasDir + "/h",
 		},
 		{
 			old: "/data/data/com.termux/files/usr/var/htop/stat",
-			new: "/data/user/0/dev.zide.terminal/tmp/htop/stat",
+			new: RuntimeAliasDir + "/hs",
 		},
 	} {
 		next, changed := replaceFixedWidthCString(rewritten, []byte(replacement.old), []byte(replacement.new))
@@ -283,6 +286,30 @@ func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 		}
 	}
 	return rewritten, rewrites
+}
+
+func PruneTermuxPrefixedBinaries(stagingRoot string) (int, error) {
+	binDir := filepath.Join(stagingRoot, "usr", "bin")
+	entries, err := os.ReadDir(binDir)
+	if os.IsNotExist(err) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	removed := 0
+	for _, entry := range entries {
+		name := entry.Name()
+		if !strings.HasPrefix(name, "termux-") {
+			continue
+		}
+		target := filepath.Join(binDir, name)
+		if err := os.Remove(target); err != nil && !os.IsNotExist(err) {
+			return removed, err
+		}
+		removed++
+	}
+	return removed, nil
 }
 
 func replaceFixedWidthCString(payload []byte, old []byte, new []byte) ([]byte, bool) {

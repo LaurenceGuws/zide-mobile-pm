@@ -82,7 +82,7 @@ artifact, not as a forever lock on package versions for the life of the APK.
 For the current app:
 
 ```bash
-zide-pm install dev-baseline --prefix /data/data/dev.zide.terminal/files/usr
+zide-pm install dev-baseline --prefix /data/data/uk.laurencegouws.zide/files/usr
 ```
 
 The default manifest points at the current Android dev snapshot prerelease. Local

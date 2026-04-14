@@ -60,7 +60,7 @@ Current MVP package:
 Examples:
   zide-pm doctor
   zide-pm list-available
-  zide-pm install dev-baseline --prefix /data/data/dev.zide.terminal/files/usr
+  zide-pm install dev-baseline --prefix /data/data/uk.laurencegouws.zide/files/usr
   zide-pm install dev-baseline --manifest ./android-dev-prefix.release.manifest.json --prefix ./tmp/usr
 
 zide-pm is the product CLI surface. Provider/package internals stay behind the

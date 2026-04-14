@@ -42,8 +42,8 @@ Initial Android dev manifest support is in place.
 The first real consumer is:
 
 - `../zide`
-- Android package name: `dev.zide.terminal`
-- Android prefix: `/data/data/dev.zide.terminal/files/usr`
+- Android package name: `uk.laurencegouws.zide`
+- Android prefix: `/data/data/uk.laurencegouws.zide/files/usr`
 - Android execution posture: Termux-compatible target SDK 28 until a modern
   userland execution model is proven
 

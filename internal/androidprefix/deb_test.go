@@ -38,7 +38,7 @@ func TestExtractDebUSRRewritesPrefixPaths(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := string(script); got != "/data/data/dev.zide.terminal/files/usr/bin\n" {
+	if got := string(script); got != "/data/data/uk.laurencegouws.zide/files/usr/bin\n" {
 		t.Fatalf("unexpected rewritten file: %q", got)
 	}
 	link, err := os.Readlink(filepath.Join(stagingRoot, "usr/bin/sample-link"))
@@ -82,8 +82,36 @@ func TestExtractDebUSRRewritesKnownBinaryTermuxPaths(t *testing.T) {
 	if bytes.Contains(rewritten, []byte("/data/data/com.termux/files/usr/var/htop/stat")) {
 		t.Fatalf("old htop path remained in binary payload: %q", rewritten)
 	}
-	if !bytes.Contains(rewritten, []byte("/data/user/0/dev.zide.terminal/tmp/htop/stat")) {
+	if !bytes.Contains(rewritten, []byte("/data/user/0/uk.laurencegouws.zide/t/hs")) {
 		t.Fatalf("new htop path missing from binary payload: %q", rewritten)
+	}
+}
+
+func TestPruneTermuxPrefixedBinaries(t *testing.T) {
+	stagingRoot := t.TempDir()
+	binDir := filepath.Join(stagingRoot, "usr/bin")
+	if err := os.MkdirAll(binDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(binDir, "termux-open"), []byte("x"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(binDir, "bash"), []byte("x"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	removed, err := PruneTermuxPrefixedBinaries(stagingRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if removed != 1 {
+		t.Fatalf("removed=%d want=1", removed)
+	}
+	if _, err := os.Stat(filepath.Join(binDir, "termux-open")); !os.IsNotExist(err) {
+		t.Fatalf("expected termux-open removed, err=%v", err)
+	}
+	if _, err := os.Stat(filepath.Join(binDir, "bash")); err != nil {
+		t.Fatalf("expected bash preserved, err=%v", err)
 	}
 }
 

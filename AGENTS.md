@@ -28,7 +28,7 @@ Rules:
 - Do not put Zide app runtime code here.
 - Do not put Android UI/lifecycle code here.
 - Do not claim unmodified `com.termux` package payloads are product-correct for
-  `dev.zide.terminal`.
+  `uk.laurencegouws.zide`.
 - Do not treat provider internals as the Zide product surface.
 - Do not describe dev snapshot prereleases as product/official releases.
 - Do not let docs or commands imply that `zide-pm-admin` is the user-facing

@@ -33,7 +33,7 @@ Boundary:
 
 - this is a dev artifact channel
 - `android-termux-deb` artifacts are pinned source payloads, not a final
-  `dev.zide.terminal` runtime contract
+  `uk.laurencegouws.zide` runtime contract
 - product prefix materialization stays in MP-A2
 
 Known limitation:
@@ -120,7 +120,7 @@ Result:
   - `zide-pm help` runs as an Android binary
   - artifact-staged app prefix includes `zide-pm`
   - `zide-pm doctor --manifest /no/such/manifest --prefix $PREFIX` works under
-    `run-as dev.zide.terminal`
+    `run-as uk.laurencegouws.zide`
   - `zide-pm list-available --manifest /no/such/manifest --prefix $PREFIX`
     prints `dev-baseline`
 

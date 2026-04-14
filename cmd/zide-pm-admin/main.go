@@ -304,6 +304,11 @@ func androidPrefixArchive(args []string) error {
 			return err
 		}
 	}
+	removedTermuxBinaries, err := androidprefix.PruneTermuxPrefixedBinaries(stagingRoot)
+	if err != nil {
+		return err
+	}
+	audit.RemovedTermuxBinaries = removedTermuxBinaries
 	if err := writeBundledZidePMInstallStamp(stagingRoot, *manifestPath, sourceHash, audit); err != nil {
 		return err
 	}
@@ -330,13 +335,14 @@ func androidPrefixArchive(args []string) error {
 		return err
 	}
 	fmt.Printf(
-		"wrote %s files=%d symlinks=%d packages=%d text_rewrites=%d binary_rewrites=%d hardcoded_termux_hits=%d manifest=%s audit=%s\n",
+		"wrote %s files=%d symlinks=%d packages=%d text_rewrites=%d binary_rewrites=%d termux_prefixed_binaries_removed=%d hardcoded_termux_hits=%d manifest=%s audit=%s\n",
 		*out,
 		archiveStats.Files,
 		archiveStats.Symlinks,
 		len(debArtifacts),
 		audit.TextRewrites,
 		audit.BinaryRewrites,
+		audit.RemovedTermuxBinaries,
 		len(audit.HardcodedTermuxHits),
 		*outManifest,
 		*auditOut,
@@ -455,24 +461,25 @@ func runCommand(name string, args ...string) error {
 }
 
 type prefixAudit struct {
-	SourceManifest      string   `json:"source_manifest"`
-	PackageCount        int      `json:"package_count"`
-	HardcodedPolicy     string   `json:"hardcoded_policy"`
-	ExtractedEntries    int      `json:"extracted_entries"`
-	ExtractedFiles      int      `json:"extracted_files"`
-	ExtractedDirs       int      `json:"extracted_dirs"`
-	ExtractedSymlinks   int      `json:"extracted_symlinks"`
-	ExtractedHardlinks  int      `json:"extracted_hardlinks"`
-	SkippedEntries      int      `json:"skipped_entries"`
-	TextRewrites        int      `json:"text_rewrites"`
-	BinaryRewrites      int      `json:"binary_rewrites"`
-	HardcodedTermuxHits []string `json:"hardcoded_termux_hits,omitempty"`
-	ArchivePath         string   `json:"archive_path"`
-	ArchiveSHA256       string   `json:"archive_sha256"`
-	ArchiveSize         int64    `json:"archive_size"`
-	ArchiveFiles        int      `json:"archive_files"`
-	ArchiveDirs         int      `json:"archive_dirs"`
-	ArchiveSymlinks     int      `json:"archive_symlinks"`
+	SourceManifest        string   `json:"source_manifest"`
+	PackageCount          int      `json:"package_count"`
+	HardcodedPolicy       string   `json:"hardcoded_policy"`
+	ExtractedEntries      int      `json:"extracted_entries"`
+	ExtractedFiles        int      `json:"extracted_files"`
+	ExtractedDirs         int      `json:"extracted_dirs"`
+	ExtractedSymlinks     int      `json:"extracted_symlinks"`
+	ExtractedHardlinks    int      `json:"extracted_hardlinks"`
+	SkippedEntries        int      `json:"skipped_entries"`
+	TextRewrites          int      `json:"text_rewrites"`
+	BinaryRewrites        int      `json:"binary_rewrites"`
+	RemovedTermuxBinaries int      `json:"removed_termux_prefixed_binaries"`
+	HardcodedTermuxHits   []string `json:"hardcoded_termux_hits,omitempty"`
+	ArchivePath           string   `json:"archive_path"`
+	ArchiveSHA256         string   `json:"archive_sha256"`
+	ArchiveSize           int64    `json:"archive_size"`
+	ArchiveFiles          int      `json:"archive_files"`
+	ArchiveDirs           int      `json:"archive_dirs"`
+	ArchiveSymlinks       int      `json:"archive_symlinks"`
 }
 
 func androidDebArtifacts(doc manifest.Document) []manifest.Artifact {
@@ -652,27 +659,28 @@ func newAndroidPrefixManifest(
 			SHA256:  archiveStats.SHA256,
 			Size:    archiveStats.Size,
 			Metadata: map[string]string{
-				"package_name":            "dev.zide.terminal",
-				"prefix":                  "/data/data/dev.zide.terminal/files/usr",
-				"archive_root":            "usr",
-				"target_sdk":              "28",
-				"provider":                "termux-main",
-				"provider_role":           "android-dev-bootstrap",
-				"provider_platform":       "android",
-				"provider_architecture":   "aarch64",
-				"source_manifest_sha256":  sourceManifestSHA256,
-				"source_package_count":    fmt.Sprintf("%d", audit.PackageCount),
-				"hardcoded_termux_hits":   fmt.Sprintf("%d", len(audit.HardcodedTermuxHits)),
-				"hardcoded_termux_policy": audit.HardcodedPolicy,
-				"text_rewrites":           fmt.Sprintf("%d", audit.TextRewrites),
-				"binary_rewrites":         fmt.Sprintf("%d", audit.BinaryRewrites),
-				"runtime_support_files":   "/data/user/0/dev.zide.terminal/tmp/bash.bashrc,/data/user/0/dev.zide.terminal/tmp/profile,/data/user/0/dev.zide.terminal/tmp/hosts,/data/user/0/dev.zide.terminal/tmp/htop/stat",
-				"runtime_support_links":   "/data/user/0/dev.zide.terminal/tmp/bash.bashrc=>/data/user/0/dev.zide.terminal/files/usr/etc/bash.bashrc,/data/user/0/dev.zide.terminal/tmp/profile=>/data/user/0/dev.zide.terminal/files/usr/etc/profile,/data/user/0/dev.zide.terminal/tmp/hosts=>/data/user/0/dev.zide.terminal/files/usr/etc/hosts,/data/user/0/dev.zide.terminal/tmp/htop/stat=>/data/user/0/dev.zide.terminal/files/usr/var/htop/stat",
-				"extracted_regular_files": fmt.Sprintf("%d", audit.ExtractedFiles),
-				"extracted_symlinks":      fmt.Sprintf("%d", audit.ExtractedSymlinks),
-				"archive_regular_files":   fmt.Sprintf("%d", archiveStats.Files),
-				"archive_symlinks":        fmt.Sprintf("%d", archiveStats.Symlinks),
-				"zide_pm_cli":             "included",
+				"package_name":                     "uk.laurencegouws.zide",
+				"prefix":                           "/data/data/uk.laurencegouws.zide/files/usr",
+				"archive_root":                     "usr",
+				"target_sdk":                       "28",
+				"provider":                         "termux-main",
+				"provider_role":                    "android-dev-bootstrap",
+				"provider_platform":                "android",
+				"provider_architecture":            "aarch64",
+				"source_manifest_sha256":           sourceManifestSHA256,
+				"source_package_count":             fmt.Sprintf("%d", audit.PackageCount),
+				"hardcoded_termux_hits":            fmt.Sprintf("%d", len(audit.HardcodedTermuxHits)),
+				"hardcoded_termux_policy":          audit.HardcodedPolicy,
+				"text_rewrites":                    fmt.Sprintf("%d", audit.TextRewrites),
+				"binary_rewrites":                  fmt.Sprintf("%d", audit.BinaryRewrites),
+				"runtime_support_files":            "/data/user/0/uk.laurencegouws.zide/t/b,/data/user/0/uk.laurencegouws.zide/t/p,/data/user/0/uk.laurencegouws.zide/t/h,/data/user/0/uk.laurencegouws.zide/t/hs",
+				"runtime_support_links":            "/data/user/0/uk.laurencegouws.zide/t/b=>/data/user/0/uk.laurencegouws.zide/files/usr/etc/bash.bashrc,/data/user/0/uk.laurencegouws.zide/t/p=>/data/user/0/uk.laurencegouws.zide/files/usr/etc/profile,/data/user/0/uk.laurencegouws.zide/t/h=>/data/user/0/uk.laurencegouws.zide/files/usr/etc/hosts,/data/user/0/uk.laurencegouws.zide/t/hs=>/data/user/0/uk.laurencegouws.zide/files/usr/var/htop/stat",
+				"removed_termux_prefixed_binaries": fmt.Sprintf("%d", audit.RemovedTermuxBinaries),
+				"extracted_regular_files":          fmt.Sprintf("%d", audit.ExtractedFiles),
+				"extracted_symlinks":               fmt.Sprintf("%d", audit.ExtractedSymlinks),
+				"archive_regular_files":            fmt.Sprintf("%d", archiveStats.Files),
+				"archive_symlinks":                 fmt.Sprintf("%d", archiveStats.Symlinks),
+				"zide_pm_cli":                      "included",
 			},
 			Limitations: []string{
 				"Development prefix archive for Android terminal bringup.",
@@ -797,7 +805,7 @@ func newAndroidDevManifest(
 			Size:     pkg.Size,
 			Metadata: metadata,
 			Limitations: []string{
-				"Payload is pinned upstream package data. Product archives must still prove dev.zide.terminal prefix correctness.",
+				"Payload is pinned upstream package data. Product archives must still prove uk.laurencegouws.zide prefix correctness.",
 			},
 		})
 	}

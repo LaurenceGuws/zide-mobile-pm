@@ -54,7 +54,7 @@ Android may use:
 Android must not claim:
 
 - unmodified `com.termux` package payload roots are product-correct for
-  `dev.zide.terminal`
+  `uk.laurencegouws.zide`
 - host-side relocation hacks are a final package-manager contract
 
 ## Providers
@@ -63,7 +63,7 @@ Providers are build-time artifact sources, not Zide runtime package managers.
 
 The current Android provider is `termux-main`. It is allowed as a development
 and bootstrap source because its package index and payloads can be pinned and
-audited. It is not automatically a product provider for `dev.zide.terminal`.
+audited. It is not automatically a product provider for `uk.laurencegouws.zide`.
 
 Provider outputs must become Zide artifact contracts before Zide consumes them.
 That keeps Android-specific mechanics out of the Zide runtime and leaves room

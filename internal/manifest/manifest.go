@@ -57,8 +57,8 @@ func NewSkeleton(platform string, channel string) (Document, error) {
 			URL:     "TODO",
 			SHA256:  "TODO",
 			Metadata: map[string]string{
-				"package_name":          "dev.zide.terminal",
-				"prefix":                "/data/data/dev.zide.terminal/files/usr",
+				"package_name":          "uk.laurencegouws.zide",
+				"prefix":                "/data/data/uk.laurencegouws.zide/files/usr",
 				"target_sdk":            "28",
 				"provider":              "termux-main",
 				"provider_role":         "android-dev-bootstrap",

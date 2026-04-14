@@ -10,7 +10,7 @@ func TestAndroidSkeletonValidates(t *testing.T) {
 	if err := doc.Validate(); err != nil {
 		t.Fatal(err)
 	}
-	if got := doc.Artifacts[0].Metadata["prefix"]; got != "/data/data/dev.zide.terminal/files/usr" {
+	if got := doc.Artifacts[0].Metadata["prefix"]; got != "/data/data/uk.laurencegouws.zide/files/usr" {
 		t.Fatalf("unexpected android prefix: %s", got)
 	}
 }
