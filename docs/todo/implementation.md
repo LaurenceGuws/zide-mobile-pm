@@ -192,8 +192,8 @@ Boundary:
 
 Interim dev channel authority: `termux-main` via `android-dev-snapshot-release`
 (audit policy) remains the pinned bootstrap path until this ticket selects the
-product provider. Latest published dev snapshot: `android-dev-2026.04.18.160336`
-(see `docs/releases/android-dev-2026.04.18.160336.md`).
+product provider. Latest published dev snapshot: `android-dev-2026.04.18.162659`
+(see `docs/releases/android-dev-2026.04.18.162659.md`).
 
 Groundwork (**MP-A6-doc**):
 
@@ -216,8 +216,10 @@ Materialize path (**MP-A6-materialize**):
 Concrete input (**MP-A6-dash-minimal**):
 
 - Termux package root **`dash`** yields a fail-policy-clean archive today (see
-  `docs/product-candidate/PACKAGES.md`). Full dev tool closure still fails fail
-  policy until additional packages are narrowed or rewritten.
+  `docs/product-candidate/PACKAGES.md`). The default dev closure also passes
+  `android-product-candidate-probe` after the `/data/data/zide.embed/files/usr`
+  binary bridge plus manifest `runtime_support_links`; product acceptance is
+  still tracked separately in `ANDROID_PRODUCT_PROVIDER_DECISION.md`.
 
 ## Next Tickets
 
