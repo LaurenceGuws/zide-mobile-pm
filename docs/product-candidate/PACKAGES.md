@@ -23,12 +23,16 @@ go run ./cmd/zide-pm-admin android-product-candidate-probe \
 # expect: mp_a6_product_candidate=pass
 ```
 
-The full dev baseline (`bash,neovim,git,...`) remains **audit-only** until
-remaining compiled-in paths are removed or owned; fail-policy hit counts drop
-with shared rewrites but are not zero yet.
+The full dev baseline (`bash,neovim,git,...`) can also satisfy
+`android-product-candidate-probe` (**`mp_a6_product_candidate=pass`**) when built
+with current `zide-pm-admin` (same-width `/data/data/zide.embed/files/usr` bridge
+plus manifest `runtime_support_links`). Treat that as **tooling evidence**, not
+automatic product acceptance: product channel rules still live in
+`ANDROID_PRODUCT_PROVIDER_DECISION.md`.
 
 ## Runtime symlinks
 
-Archives built after this rewrite set advertise extra `runtime_support_links`
-entries under `/data/data/uk.laurencegouws.zide/` (`ul`, `ub`, `b`, `u/bsh`).
+Archives built after this rewrite set advertise `runtime_support_links` for the
+`/data/data/zide.embed/files/usr` bridge and short aliases under
+`/data/data/uk.laurencegouws.zide/` (`ul`, `ub`, `b`, `u/bsh`).
 See `ZIDE_MOBILE_ARTIFACT_CONSUMER.md` and emitted manifest metadata.
