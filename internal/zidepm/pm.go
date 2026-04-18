@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"time"
 
@@ -89,8 +90,17 @@ func LoadSource(ctx context.Context, location string) (Source, error) {
 }
 
 func AvailablePackages(source Source) []string {
+	var out []string
 	if _, err := AndroidPrefixArtifact(source); err == nil {
-		return []string{DevBaselinePackage}
+		out = append(out, DevBaselinePackage)
+	}
+	if AndroidCatalogActive() {
+		tb := testBinaryPackageNames(source)
+		sort.Strings(tb)
+		out = append(out, tb...)
+	}
+	if len(out) > 0 {
+		return out
 	}
 
 	seen := map[string]bool{}
@@ -106,7 +116,15 @@ func AvailablePackages(source Source) []string {
 		seen[name] = true
 		packages = append(packages, name)
 	}
+	sort.Strings(packages)
 	return packages
+}
+
+func artifactCacheSuffix(artifact manifest.Artifact) string {
+	if artifact.Kind == "android-test-binary" {
+		return ".bin"
+	}
+	return ".tar.gz"
 }
 
 func LoadInstallStamp(prefix string) (InstallStamp, error) {
@@ -191,7 +209,7 @@ func FetchArtifact(ctx context.Context, artifact manifest.Artifact, artifactURL 
 		return "", err
 	}
 	cacheName := strings.NewReplacer("/", "_", "\\", "_", ":", "_").Replace(
-		artifact.Name + "-" + artifact.Version + "-" + artifact.SHA256[:12] + ".tar.gz",
+		artifact.Name + "-" + artifact.Version + "-" + artifact.SHA256[:12] + artifactCacheSuffix(artifact),
 	)
 	cachePath := filepath.Join(cacheDir, cacheName)
 	if verifyPath(cachePath, artifact.Size, artifact.SHA256) {
