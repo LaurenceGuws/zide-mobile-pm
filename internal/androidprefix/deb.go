@@ -322,10 +322,16 @@ func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 	return rewritten, rewrites
 }
 
-// rewriteBinaryEmbeddedUSRPrefix swaps every legacy Termux usr root substring in
-// a binary payload for BinaryEmbeddedUSRPrefix (same width). Known-path rules in
-// rewriteKnownBinaryTermuxPaths run first so longer literals still rewrite to
-// their dedicated targets.
+// rewriteBinaryEmbeddedUSRPrefix swaps every contiguous legacy Termux usr root
+// substring in a non-text payload for BinaryEmbeddedUSRPrefix (same width).
+// Safety properties: (1) only exact len(oldPrefix) matches are touched, so bytes
+// before/after a match stay aligned; (2) matches cannot overlap, so each
+// occurrence is independent; (3) known-path rules in rewriteKnownBinaryTermuxPaths
+// run first so longer literals rewrite to their dedicated targets instead of
+// being split by this pass. Residual risk is the same as any binary string patch:
+// an unrelated file that is not UTF-8 text but contains this exact 31-byte ASCII
+// sequence by coincidence would be rewritten; Termux usr/ payloads observed in
+// practice are dominated by ELF and other host binaries carrying this path.
 func rewriteBinaryEmbeddedUSRPrefix(payload []byte, oldPrefix []byte) ([]byte, int) {
 	newPrefix := []byte(BinaryEmbeddedUSRPrefix)
 	out := payload
