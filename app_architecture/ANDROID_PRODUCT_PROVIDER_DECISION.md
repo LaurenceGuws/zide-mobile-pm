@@ -117,3 +117,11 @@ paths:
 On failure, **`prefix.audit.json`** is still written (and the command exits
 non-zero) so the materialize step matches probe evidence. Operator notes live in
 `docs/product-candidate/README.md`.
+
+## Concrete passing input (minimal)
+
+A **product-candidate manifest** that passes **`android-product-candidate-probe`**
+today uses Termux **`dash`** as the only root package (see
+`docs/product-candidate/PACKAGES.md`). The full dev tool baseline remains
+**audit-only** until MP-A6 closes on a broader package set under **fail**
+policy.

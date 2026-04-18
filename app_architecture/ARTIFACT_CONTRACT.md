@@ -111,7 +111,9 @@ archives may use `audit` only when the emitted audit file is treated as a real
 blocker list, not as compatibility debt to ignore.
 
 `text_rewrites` counts safe text/symlink prefix rewrites. `binary_rewrites`
-counts explicit fixed-width C-string rewrites for known compiled provider paths.
+counts explicit fixed-width C-string rewrites for known compiled provider paths
+(including dash/elvish-style `usr/lib`, `usr/bin`, `RfPATH`, and `usr/bin/sh`
+targets, with C-string boundary rules so `usr/lib/...` paths are not corrupted).
 Unknown compiled `com.termux` paths must stay in `hardcoded_termux_hits`.
 `runtime_support_files` lists app-owned files the consumer must materialize
 outside the `usr/` archive root for those known binary rewrites.
