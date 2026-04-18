@@ -1,5 +1,10 @@
 # android-dev-2026.04.18.162659
 
+**Note (APX-B18 / MP-A9):** this snapshot advertised a
+`/data/data/zide.embed/files/usr` `runtime_support_links` bridge that the Android
+app sandbox cannot materialize. Later dev snapshots replace it with
+`/data/data/uk.laurencegouws.zide/.z` and a variable-length binary rewrite.
+
 Automated Android **development** snapshot prerelease (not a product release).
 
 - GitHub: https://github.com/LaurenceGuws/zide-mobile-pm/releases/tag/android-dev-2026.04.18.162659

@@ -78,11 +78,13 @@ for MP-A7 alignment with real manifests):
 `runtime_support_links` on newly emitted prefix manifests; materialize them with
 the same rules as other `source=>target` pairs.
 
-**Binary embed bridge:** compiled payloads may reference
-`/data/data/zide.embed/files/usr` (same width as the legacy Termux usr root).
-Materialize the manifest `runtime_support_links` pair that maps this path to the
-real prefix (`metadata.prefix`, typically `/data/data/uk.laurencegouws.zide/files/usr`)
-before executing rewritten binaries.
+**Binary usr bridge (MP-A9):** compiled payloads may reference
+`/data/data/uk.laurencegouws.zide/.z` (a symlink source under the app package
+directory). Materialize the manifest `runtime_support_links` pair that maps this
+path to the real prefix (`metadata.prefix`, typically
+`/data/data/uk.laurencegouws.zide/files/usr`) before executing rewritten binaries.
+The earlier `/data/data/zide.embed/files/usr` bridge is **not** Android-app
+materializable (APX-B18) and must not be used in new manifests.
 
 `zide` should treat unknown metadata keys as **opaque** unless this contract or
 `ARTIFACT_CONTRACT.md` promotes them; do not infer provider package-manager

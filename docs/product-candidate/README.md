@@ -40,3 +40,7 @@ See **`PACKAGES.md`**: single-root **`dash`** manifest + probe/materialize.
 Authority: `app_architecture/ANDROID_PRODUCT_PROVIDER_DECISION.md`.
 
 Consumer rules for emitted manifests: `app_architecture/ZIDE_MOBILE_ARTIFACT_CONSUMER.md`.
+
+**APX-B18 / MP-A9:** dev prefix manifests must not require materializing a sibling
+`/data/data/zide.embed/...` tree; the supported usr-root bridge is
+`/data/data/<package_name>/.z` under the app sandbox (see `ARTIFACT_CONTRACT.md`).

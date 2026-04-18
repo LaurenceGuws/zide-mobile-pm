@@ -217,9 +217,10 @@ Concrete input (**MP-A6-dash-minimal**):
 
 - Termux package root **`dash`** yields a fail-policy-clean archive today (see
   `docs/product-candidate/PACKAGES.md`). The default dev closure also passes
-  `android-product-candidate-probe` after the `/data/data/zide.embed/files/usr`
-  binary bridge plus manifest `runtime_support_links`; product acceptance is
-  still tracked separately in `ANDROID_PRODUCT_PROVIDER_DECISION.md`.
+  `android-product-candidate-probe` after the `/data/data/uk.laurencegouws.zide/.z`
+  binary bridge (APX-B18 / MP-A9; rejects `/data/data/zide.embed/files/usr` for
+  Android sandbox materialization) plus manifest `runtime_support_links`; product
+  acceptance is still tracked separately in `ANDROID_PRODUCT_PROVIDER_DECISION.md`.
 
 ## Next Tickets
 

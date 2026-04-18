@@ -111,11 +111,16 @@ archives may use `audit` only when the emitted audit file is treated as a real
 blocker list, not as compatibility debt to ignore.
 
 `text_rewrites` counts safe text/symlink prefix rewrites. `binary_rewrites`
-counts fixed-width ELF-safe rewrites: known compiled provider paths (including
-dash/elvish-style `usr/lib`, `usr/bin`, `RfPATH`, and `usr/bin/sh` targets, with
-C-string boundary rules so `usr/lib/...` paths are not corrupted), plus a
-same-width blanket swap of `/data/data/com.termux/files/usr` to
-`/data/data/zide.embed/files/usr` for any remaining compiled occurrences.
+counts ELF-oriented rewrites: fixed-width C-string swaps for known compiled
+provider paths (including dash/elvish-style `usr/lib`, `usr/bin`, `RfPATH`, and
+`usr/bin/sh` targets, with C-string boundary rules so `usr/lib/...` paths are not
+corrupted), plus a **variable-length** replace of `/data/data/com.termux/files/usr`
+with `/data/data/<package_name>/.z` (under the app sandbox) for remaining
+compiled occurrences. That broader replace can shift `.rodata` layout; treat it
+as a deliberate trade for Android materialization (APX-B18 / MP-A9), not a silent
+compat shim. The historical `/data/data/zide.embed/files/usr` same-width bridge
+is **rejected** for Android app staging: it is not materializable without a
+foreign `/data/data/zide.embed` directory.
 `hardcoded_termux_hits` lists paths that still embed `/data/data/com.termux/files/usr`
 after those passes (for example symlink targets or non-binary payloads that were
 not rewritten).
@@ -123,7 +128,7 @@ not rewritten).
 outside the `usr/` archive root for those known binary rewrites.
 `runtime_support_links` lists `source=>target` symlinks that let shortened
 runtime paths point back at files staged from the archive (including the
-`/data/data/zide.embed/files/usr` bridge to the real `metadata.prefix` root).
+`/data/data/<package_name>/.z` bridge to the real `metadata.prefix` root).
 
 ## iOS Initial Kinds
 

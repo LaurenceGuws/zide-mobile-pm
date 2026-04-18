@@ -93,11 +93,13 @@ this probe). **Non-zero** means hits remain; an audit JSON is written to
 **`dist/mp-a6-product-candidate.audit.json`** by default (`-audit-out` overrides)
 so the blocker list is inspectable without starting from audit-mode tarballs.
 
-With current `zide-pm-admin` binary rewrite rules (including the fixed-width
-`/data/data/zide.embed/files/usr` bridge), the default pinned dev manifest used
-by this probe may **pass** fail policy while upstream packages are still
-`termux-main` inputs. Passing the probe is **not** the same as closing MP-A6
-product acceptance; it is one executable gate on compiled-in usr-root strings.
+With current `zide-pm-admin` binary rewrite rules (including the app-sandbox
+`/data/data/<package_name>/.z` usr bridge and variable-length `.rodata` edits),
+the default pinned dev manifest used by this probe may **pass** fail policy while
+upstream packages are still `termux-main` inputs. Passing the probe is **not** the
+same as closing MP-A6 product acceptance; it is one executable gate on
+compiled-in usr-root strings. The `/data/data/zide.embed/files/usr` bridge is
+**rejected** for Android consumer materialization (APX-B18 / MP-A9).
 
 ## Materialize path (product-candidate outputs)
 
