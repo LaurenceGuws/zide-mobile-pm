@@ -673,13 +673,8 @@ func newAndroidPrefixManifest(
 				"hardcoded_termux_policy":          audit.HardcodedPolicy,
 				"text_rewrites":                    fmt.Sprintf("%d", audit.TextRewrites),
 				"binary_rewrites":                  fmt.Sprintf("%d", audit.BinaryRewrites),
-				"runtime_support_files":            "/data/user/0/uk.laurencegouws.zide/t/b,/data/user/0/uk.laurencegouws.zide/t/p,/data/user/0/uk.laurencegouws.zide/t/h,/data/user/0/uk.laurencegouws.zide/t/hs",
-				"runtime_support_links": androidprefix.BinaryEmbeddedUSRPrefix + "=>" + androidprefix.AppUSRPath + "," +
-					"/data/user/0/uk.laurencegouws.zide/t/b=>/data/user/0/uk.laurencegouws.zide/files/usr/etc/bash.bashrc,/data/user/0/uk.laurencegouws.zide/t/p=>/data/user/0/uk.laurencegouws.zide/files/usr/etc/profile,/data/user/0/uk.laurencegouws.zide/t/h=>/data/user/0/uk.laurencegouws.zide/files/usr/etc/hosts,/data/user/0/uk.laurencegouws.zide/t/hs=>/data/user/0/uk.laurencegouws.zide/files/usr/var/htop/stat," +
-					"/data/data/uk.laurencegouws.zide/ul=>/data/data/uk.laurencegouws.zide/files/usr/lib," +
-					"/data/data/uk.laurencegouws.zide/ub=>/data/data/uk.laurencegouws.zide/files/usr/bin," +
-					"/data/data/uk.laurencegouws.zide/b=>/data/data/uk.laurencegouws.zide/files/usr/bin," +
-					"/data/data/uk.laurencegouws.zide/u/bsh=>/data/data/uk.laurencegouws.zide/files/usr/bin/sh",
+				"runtime_support_files":            androidprefix.PrefixArchiveRuntimeSupportFiles(),
+				"runtime_support_links":            androidprefix.PrefixArchiveRuntimeSupportLinks(),
 				"removed_termux_prefixed_binaries": fmt.Sprintf("%d", audit.RemovedTermuxBinaries),
 				"extracted_regular_files":          fmt.Sprintf("%d", audit.ExtractedFiles),
 				"extracted_symlinks":               fmt.Sprintf("%d", audit.ExtractedSymlinks),
