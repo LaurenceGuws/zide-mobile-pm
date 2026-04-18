@@ -46,6 +46,10 @@ func main() {
 		if err := androidPrefixArchive(os.Args[2:]); err != nil {
 			die(err)
 		}
+	case "android-product-candidate-probe":
+		if err := androidProductCandidateProbe(os.Args[2:]); err != nil {
+			die(err)
+		}
 	case "android-dev-snapshot-release":
 		if err := androidDevRelease(os.Args[2:]); err != nil {
 			die(err)
@@ -70,6 +74,8 @@ Commands:
              Fetch/cache Android package metadata and emit a pinned dev manifest.
   android-prefix-archive
              Build a dev Android prefix archive from a pinned dev manifest.
+  android-product-candidate-probe
+             MP-A6 evidence: run prefix archive with hardcoded-policy=fail (temp outputs).
   android-dev-snapshot-release
              Publish a fast Android dev snapshot prerelease with generated artifacts.
   contract   Print the current artifact contract skeleton as JSON.
@@ -314,7 +320,10 @@ func androidPrefixArchive(args []string) error {
 		return err
 	}
 	if len(audit.HardcodedTermuxHits) > 0 && *hardcodedPolicy == "fail" {
-		return fmt.Errorf("hardcoded com.termux hits remain: %d", len(audit.HardcodedTermuxHits))
+		if err := writeJSON(*auditOut, audit); err != nil {
+			return err
+		}
+		return fmt.Errorf("hardcoded com.termux hits remain: %d (audit written to %s)", len(audit.HardcodedTermuxHits), *auditOut)
 	}
 
 	archiveStats, err := androidprefix.WriteTarGz(stagingRoot, *out)
