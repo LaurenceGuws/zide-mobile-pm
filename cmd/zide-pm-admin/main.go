@@ -50,6 +50,10 @@ func main() {
 		if err := androidProductCandidateProbe(os.Args[2:]); err != nil {
 			die(err)
 		}
+	case "android-product-candidate-materialize":
+		if err := androidProductCandidateMaterialize(os.Args[2:]); err != nil {
+			die(err)
+		}
 	case "android-dev-snapshot-release":
 		if err := androidDevRelease(os.Args[2:]); err != nil {
 			die(err)
@@ -76,6 +80,8 @@ Commands:
              Build a dev Android prefix archive from a pinned dev manifest.
   android-product-candidate-probe
              MP-A6 evidence: run prefix archive with hardcoded-policy=fail (temp outputs).
+  android-product-candidate-materialize
+             MP-A6 path: same as probe policy but writes dist/product-candidate/* on success.
   android-dev-snapshot-release
              Publish a fast Android dev snapshot prerelease with generated artifacts.
   contract   Print the current artifact contract skeleton as JSON.
