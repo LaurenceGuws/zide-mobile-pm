@@ -2,6 +2,35 @@
 
 This is the active queue for the `zide-mobile-pm` repo.
 
+## Reporting Contract
+
+Required report headers:
+
+- `LABELS`
+- `#DONE`
+- `#OUTSTANDING`
+- `COMMITS`
+- `VALIDATION`
+- `Blocked by Archtect review needed: true|false`
+
+Required `LABELS` fields:
+
+- `Lane: zide_mobile_pm`
+- `Batch: <MP-*>`
+- `Gate: in_progress|super_gate`
+- `Focus: <one-line>`
+- `Blockers: none|<summary>`
+
+Label meanings:
+
+- `Planned`: queued/in-progress scope not yet validated
+- `Confirmed`: implemented and validated in this run
+- `Deferred`: explicitly moved out of this batch
+- `Blocked`: cannot proceed without external decision/dependency
+- `ReviewRequired`: super-gate reached, architect verdict pending
+- `Accepted`: architect reviewed and approved
+- `Rejected`: architect reviewed and not approved
+
 ## Completed
 
 ### MP-A0 Provider Model — met

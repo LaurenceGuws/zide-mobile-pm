@@ -23,6 +23,24 @@ Default workflow:
    - `go test ./...`
    - `go run ./cmd/zide-pm-admin validate examples/android-dev.manifest.json`
 
+Progress reporting contract (mandatory):
+
+- Every status report must include:
+  - `LABELS`
+  - `#DONE`
+  - `#OUTSTANDING`
+  - `COMMITS`
+  - `VALIDATION`
+  - `Blocked by Archtect review needed: true|false`
+- `LABELS` must include:
+  - `Lane: zide_mobile_pm`
+  - `Batch: <MP-*>`
+  - `Gate: in_progress|super_gate`
+  - `Focus: <one-line>`
+  - `Blockers: none|<summary>`
+- At super-gate handoff packets, set:
+  - `Blocked by Archtect review needed: true`
+
 Rules:
 
 - Do not put Zide app runtime code here.
