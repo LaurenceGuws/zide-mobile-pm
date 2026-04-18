@@ -111,14 +111,19 @@ archives may use `audit` only when the emitted audit file is treated as a real
 blocker list, not as compatibility debt to ignore.
 
 `text_rewrites` counts safe text/symlink prefix rewrites. `binary_rewrites`
-counts explicit fixed-width C-string rewrites for known compiled provider paths
-(including dash/elvish-style `usr/lib`, `usr/bin`, `RfPATH`, and `usr/bin/sh`
-targets, with C-string boundary rules so `usr/lib/...` paths are not corrupted).
-Unknown compiled `com.termux` paths must stay in `hardcoded_termux_hits`.
+counts fixed-width ELF-safe rewrites: known compiled provider paths (including
+dash/elvish-style `usr/lib`, `usr/bin`, `RfPATH`, and `usr/bin/sh` targets, with
+C-string boundary rules so `usr/lib/...` paths are not corrupted), plus a
+same-width blanket swap of `/data/data/com.termux/files/usr` to
+`/data/data/zide.embed/files/usr` for any remaining compiled occurrences.
+`hardcoded_termux_hits` lists paths that still embed `/data/data/com.termux/files/usr`
+after those passes (for example symlink targets or non-binary payloads that were
+not rewritten).
 `runtime_support_files` lists app-owned files the consumer must materialize
 outside the `usr/` archive root for those known binary rewrites.
 `runtime_support_links` lists `source=>target` symlinks that let shortened
-runtime paths point back at files staged from the archive.
+runtime paths point back at files staged from the archive (including the
+`/data/data/zide.embed/files/usr` bridge to the real `metadata.prefix` root).
 
 ## iOS Initial Kinds
 

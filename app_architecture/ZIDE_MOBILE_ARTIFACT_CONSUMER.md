@@ -78,6 +78,12 @@ for MP-A7 alignment with real manifests):
 `runtime_support_links` on newly emitted prefix manifests; materialize them with
 the same rules as other `source=>target` pairs.
 
+**Binary embed bridge:** compiled payloads may reference
+`/data/data/zide.embed/files/usr` (same width as the legacy Termux usr root).
+Materialize the manifest `runtime_support_links` pair that maps this path to the
+real prefix (`metadata.prefix`, typically `/data/data/uk.laurencegouws.zide/files/usr`)
+before executing rewritten binaries.
+
 `zide` should treat unknown metadata keys as **opaque** unless this contract or
 `ARTIFACT_CONTRACT.md` promotes them; do not infer provider package-manager
 behavior from them.
