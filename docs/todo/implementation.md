@@ -192,8 +192,8 @@ Boundary:
 
 Interim dev channel authority: `termux-main` via `android-dev-snapshot-release`
 (audit policy) remains the pinned bootstrap path until this ticket selects the
-product provider. Latest published dev snapshot: `android-dev-2026.04.18.175422`
-(see `docs/releases/android-dev-2026.04.18.175422.md`).
+product provider. Latest published dev snapshot: `android-dev-2026.04.18.182005`
+(see `docs/releases/android-dev-2026.04.18.182005.md`).
 
 Groundwork (**MP-A6-doc**):
 
