@@ -60,6 +60,18 @@ The intended product direction is:
   `recommended`, `terminal-baseline`, or similar once the onboarding/install
   model is mature enough
 
+## Android catalog mode
+
+When the Zide Android host runs `zide-pm`, it sets `ZIDE_PM_HOST_PLATFORM=android`.
+In that mode, manifests may advertise additional `android-test-binary` artifacts;
+`zide-pm list-available` and `zide-pm install <name>` treat those as first-class
+packages alongside `dev-baseline`. Without this variable (typical developer
+machine runs), the test-binary catalog stays hidden so host workflows do not
+accidentally claim Android-only install semantics.
+
+`zide-pm doctor` prints `zide_pm_host_platform` so operators can see which mode
+is active.
+
 ## Boundary
 
 `zide-pm` consumes manifests and prefix archives. It does not parse `.deb`
