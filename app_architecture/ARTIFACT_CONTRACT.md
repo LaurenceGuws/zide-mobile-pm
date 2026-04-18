@@ -44,6 +44,7 @@ infer that a kind from one platform is valid for another platform.
 - `android-prefix-archive`
 - `android-termux-package-index`
 - `android-termux-deb`
+- `android-test-binary`
 
 Meaning:
 
@@ -56,6 +57,11 @@ Meaning:
 - `android-termux-deb`: a pinned upstream package payload. This is source
   material for host-side artifact production, not a direct product runtime
   promise.
+- `android-test-binary`: a single pinned file (executable or data) installed
+  under the app-private prefix at `metadata.install_relative_path` (relative to
+  the prefix root, same layout as extracted `usr/` contents). Intended for
+  Android catalog mode only: `zide-pm` lists and installs these when
+  `ZIDE_PM_HOST_PLATFORM=android`. iOS does not reuse this kind.
 
 The current kind names are intentionally specific because they describe the
 payload format. Provider identity is recorded separately in metadata.
@@ -97,6 +103,8 @@ Initial Android metadata keys:
 - `binary_rewrites`
 - `runtime_support_files`
 - `runtime_support_links`
+- `install_relative_path` (required for `android-test-binary`; relative path under the prefix)
+- `unix_mode` (optional octal mode for installed test binary files, default `0755`)
 
 `hardcoded_termux_policy=fail` is the product-clean default. Development
 archives may use `audit` only when the emitted audit file is treated as a real
