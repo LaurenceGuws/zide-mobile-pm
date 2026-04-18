@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	DefaultAndroidDevManifestURL = "https://github.com/LaurenceGuws/zide-mobile-pm/releases/download/android-dev-2026.04.18.133313/android-dev-prefix.release.manifest.json"
+	DefaultAndroidDevManifestURL = "https://github.com/LaurenceGuws/zide-mobile-pm/releases/download/android-dev-2026.04.18.140021/android-dev-prefix.release.manifest.json"
 	DevBaselinePackage           = "dev-baseline"
 )
 
