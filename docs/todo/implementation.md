@@ -195,6 +195,12 @@ Interim dev channel authority: `termux-main` via `android-dev-snapshot-release`
 product provider. Latest published dev snapshot: `android-dev-2026.04.18.140021`
 (see `docs/releases/android-dev-2026.04.18.140021.md`).
 
+Groundwork (**MP-A6-doc**):
+
+- `app_architecture/ANDROID_PRODUCT_PROVIDER_DECISION.md` defines dev vs product
+  channel vocabulary, explicit Bash startup path expectations, `com.termux`
+  hit / policy meaning, and the three provider options under consideration.
+
 ## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`
@@ -209,6 +215,13 @@ Acceptance:
   product candidate
 
 ### MP-A7 Zide Consumer Contract
+
+Groundwork (**MP-A7-doc**):
+
+- `app_architecture/ZIDE_MOBILE_ARTIFACT_CONSUMER.md` states allowed manifest
+  inputs, required staging/verification behavior, forbidden package-internal
+  parsers, and which metadata fields constitute version/compatibility truth for
+  the Zig/runtime consumer.
 
 Acceptance:
 

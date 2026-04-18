@@ -34,6 +34,10 @@ Zide-family mobile consumers that need the same artifact discipline.
 - PTY/session semantics
 - user-facing bootstrap progress and errors
 
+Artifact staging obligations for mobile prefixes are constrained by
+`ZIDE_MOBILE_ARTIFACT_CONSUMER.md` (MP-A7): manifests and hashes are the
+contract; package internals stay in `zide-mobile-pm` admin tooling.
+
 ## Android First
 
 Android currently needs:

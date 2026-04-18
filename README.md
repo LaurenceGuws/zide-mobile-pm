@@ -133,7 +133,9 @@ that UX.
 ## Near-Term Plan
 
 1. Decide whether product Android packages come from the current `termux-main`
-   provider, a Zide-owned provider, or a controlled mirror/fork.
+   provider, a Zide-owned provider, or a controlled mirror/fork. Decision space
+   and interim dev authority: `app_architecture/ANDROID_PRODUCT_PROVIDER_DECISION.md`.
+   Zide runtime staging contract: `app_architecture/ZIDE_MOBILE_ARTIFACT_CONSUMER.md`.
 2. Remove or formally own remaining compiled-in Termux prefix assumptions for
    product archives.
 3. Add real on-device `zide-pm install/remove/upgrade` semantics after the

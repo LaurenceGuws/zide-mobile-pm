@@ -57,6 +57,13 @@ dependency strings, repository names, or extraction rules.
 Consumers should use provider metadata for provenance and compatibility checks,
 not to infer runtime package-manager behavior.
 
+## Product provider decision (MP-A6)
+
+See `ANDROID_PRODUCT_PROVIDER_DECISION.md` for the decision space (dev vs
+product channel, Bash path, `com.termux` policy gates, and candidate provider
+paths). This file stays the vocabulary for *what a provider is*; that file
+owns *which provider wins for product*.
+
 ## Dev snapshot channel (interim)
 
 Until **MP-A6** closes with a product provider decision, the **authoritative
