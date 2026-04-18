@@ -107,6 +107,26 @@ Boundary:
 - arbitrary package install/remove/upgrade is not implemented
 - arbitrary package install/remove/upgrade is not implemented
 
+### MP-A8 Android host-aware test-binary pull/install — met (foundation)
+
+Result:
+
+- artifact kind `android-test-binary` validates on Android manifests with
+  `metadata.install_relative_path` and standard provider metadata
+- `zide-pm` honors `ZIDE_PM_HOST_PLATFORM=android` for catalog visibility;
+  without it, test-binary entries stay out of `list-available` so host runs do
+  not imply Android-only install semantics
+- `zide-pm install <android-test-binary name>` downloads the pinned payload,
+  verifies size/hash, and writes under the prefix at `install_relative_path`
+- `zide-pm doctor` prints `zide_pm_host_platform`
+- iOS is not assigned this kind; platform/kind pairing stays explicit in
+  validation
+
+Boundary:
+
+- no Java/Android UI or app lifecycle code in this repo
+- product naming remains `zide-pm` / `zide-pm-admin` only
+
 ### MP-A5 Android zide-pm Staging — met
 
 Result:
