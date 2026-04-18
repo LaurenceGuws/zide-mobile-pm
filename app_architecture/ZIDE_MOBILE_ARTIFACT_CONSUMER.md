@@ -13,6 +13,22 @@ staging mobile artifacts, and what it must **not** implement.
 - A **manifest** (`schema_version: 1`, `project: zide-mobile-pm`, `platform:
   android`) as a **local path** and/or **HTTPS URL** pinned by release or
   config.
+
+### Manifest document (top-level)
+
+| Field | Role |
+|-------|------|
+| `schema_version` | Must be `1` today |
+| `project` | Must be `zide-mobile-pm` for artifacts from this repo |
+| `platform` | `android` for Android prefix workflows |
+| `channel` | Channel name carried into generated prefix manifests (e.g. `dev` today); product channels should use distinct values once published |
+| `artifacts` | Pinned artifact list |
+| `notes` | Non-authoritative hints; do not override artifact fields |
+
+Product-candidate builds emitted by **`android-product-candidate-materialize`**
+use the **same** `android-prefix-archive` artifact shape as dev; compatibility
+gating for product should include **`metadata.hardcoded_termux_policy=fail`**
+and **`hardcoded_termux_hits=0`** before treating an archive as product-clean.
 - For bootstrap / prefix materialization: the single **`android-prefix-archive`**
   artifact selected by the same cardinality rule as `zide-pm` (exactly one per
   manifest for that workflow).
