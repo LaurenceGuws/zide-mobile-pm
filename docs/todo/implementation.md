@@ -201,6 +201,12 @@ Groundwork (**MP-A6-doc**):
   channel vocabulary, explicit Bash startup path expectations, `com.termux`
   hit / policy meaning, and the three provider options under consideration.
 
+Executable gate (**MP-A6-probe**):
+
+- `zide-pm-admin android-product-candidate-probe` runs `android-prefix-archive`
+  with **`hardcoded-policy=fail`** and records audit output (default
+  `dist/mp-a6-product-candidate.audit.json` on failure) for MP-A6 evidence.
+
 ## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`

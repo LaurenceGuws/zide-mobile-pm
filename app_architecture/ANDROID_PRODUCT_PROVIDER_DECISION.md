@@ -76,3 +76,23 @@ MP-A6 is **met** when:
   `-hardcoded-policy fail`;
 - docs name **dev vs product** authoritative providers and roles without mixing
   audit artifacts into product claims.
+
+## Executable evidence (product-candidate probe)
+
+Run:
+
+```bash
+go run ./cmd/zide-pm-admin android-product-candidate-probe \
+  -manifest dist/android-dev.manifest.json
+```
+
+This command builds prefix archive inputs with **`hardcoded_termux_policy=fail`**
+into disposable temp paths. **Exit code 0** means no compiled-in `com.termux`
+hits remain under fail policy for that manifest (product-candidate clean for
+this probe). **Non-zero** means hits remain; an audit JSON is written to
+**`dist/mp-a6-product-candidate.audit.json`** by default (`-audit-out` overrides)
+so the blocker list is inspectable without starting from audit-mode tarballs.
+
+The default dev package set is expected to **fail** this probe until MP-A6
+narrows inputs or changes provider payloads. That failure is **evidence**, not a
+tooling defect.

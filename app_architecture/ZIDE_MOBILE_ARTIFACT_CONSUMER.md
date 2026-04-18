@@ -30,6 +30,37 @@ staging mobile artifacts, and what it must **not** implement.
   - `hardcoded_termux_policy` and numeric `hardcoded_termux_hits` for gating
   - `limitations` array on the artifact for human-visible constraints
 
+### `android-prefix-archive` metadata emitted today (`zide-pm-admin`)
+
+The following keys are written on **`android-prefix-archive`** artifacts produced
+by `zide-pm-admin android-prefix-archive` / dev snapshot releases (authoritative
+for MP-A7 alignment with real manifests):
+
+| Key | Role |
+|-----|------|
+| `package_name` | Android app id the tree is shaped for |
+| `prefix` | Intended on-device prefix root |
+| `archive_root` | `usr` for current archives |
+| `target_sdk` | Terminal/userland compatibility posture |
+| `provider` | Source provider id (e.g. `termux-main`) |
+| `provider_role` | Channel role (e.g. `android-dev-bootstrap`) |
+| `provider_platform` | `android` |
+| `provider_architecture` | e.g. `aarch64` |
+| `source_manifest_sha256` | Hex sha256 of generating MP-A1-style manifest |
+| `source_package_count` | Count of `android-termux-deb` inputs |
+| `hardcoded_termux_hits` | Count of remaining compiled-in `com.termux` hits |
+| `hardcoded_termux_policy` | `audit` or `fail` for this build |
+| `text_rewrites` / `binary_rewrites` | Prefix rewrite tallies |
+| `runtime_support_files` | Comma-separated app-owned paths to materialize |
+| `runtime_support_links` | `source=>target` symlink specs for the consumer |
+| `removed_termux_prefixed_binaries` | Pruned Termux-prefixed binaries count |
+| `extracted_*` / `archive_*` | File/symlink counts from build vs archive |
+| `zide_pm_cli` | Whether `usr/bin/zide-pm` was bundled (`included` when set) |
+
+`zide` should treat unknown metadata keys as **opaque** unless this contract or
+`ARTIFACT_CONTRACT.md` promotes them; do not infer provider package-manager
+behavior from them.
+
 `zide` may surface **`zide-pm`** inside the staged prefix for user-driven
 install/catalog flows; the Zig/runtime layer should still treat the **manifest
 + prefix archive** as the authoritative bootstrap contract.

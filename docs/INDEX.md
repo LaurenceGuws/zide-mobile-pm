@@ -12,7 +12,7 @@ Naming rules:
 
 Start here:
 
-- `README.md` — project scope and current commands
+- `README.md` — project scope and current commands (includes `android-product-candidate-probe`)
 - `app_architecture/MOBILE_PACKAGE_MANAGER_BOUNDARY.md` — repo boundary
 - `app_architecture/ZIDE_PM_CLI.md` — user-facing mobile package CLI
 - `app_architecture/PROVIDER_MODEL.md` — provider/source boundary
