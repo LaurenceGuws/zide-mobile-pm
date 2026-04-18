@@ -15,6 +15,10 @@ the dev snapshot prerelease lane (`android-dev-snapshot-release`), which uses
 | `dist/product-candidate/android-prefix.manifest.json` | `android-prefix-archive` manifest document |
 | `dist/product-candidate/prefix.audit.json` | Extraction / rewrite / hit audit |
 
+## Minimal passing input
+
+See **`PACKAGES.md`**: single-root **`dash`** manifest + probe/materialize.
+
 ## Commands (`zide-pm-admin`)
 
 1. **Probe** (disposable temp tarball; persistent fail audit default):
