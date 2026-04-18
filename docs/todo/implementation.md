@@ -213,6 +213,12 @@ Materialize path (**MP-A6-materialize**):
   archive build and writes **`dist/product-candidate/*`** on success (operator
   doc: `docs/product-candidate/README.md`).
 
+Concrete input (**MP-A6-dash-minimal**):
+
+- Termux package root **`dash`** yields a fail-policy-clean archive today (see
+  `docs/product-candidate/PACKAGES.md`). Full dev tool closure still fails fail
+  policy until additional packages are narrowed or rewritten.
+
 ## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`
