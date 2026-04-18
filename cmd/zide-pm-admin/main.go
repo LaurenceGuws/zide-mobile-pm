@@ -170,7 +170,7 @@ func androidDevRelease(args []string) error {
 	}); err != nil {
 		return err
 	}
-	if err := writeReleaseManifest(prefixManifestPath, releaseManifestPath, filepath.Base(prefixArchivePath)); err != nil {
+	if err := writeAndroidDevReleaseManifest(prefixManifestPath, releaseManifestPath, filepath.Base(prefixArchivePath)); err != nil {
 		return err
 	}
 	if err := manifestPathValid(releaseManifestPath); err != nil {
@@ -187,6 +187,7 @@ func androidDevRelease(args []string) error {
 		releaseManifestPath,
 		devManifestPath,
 		prefixArchivePath,
+		catalogSmokeReleaseAssetPath(),
 		auditPath,
 	}
 	fmt.Printf("prepared android dev snapshot release tag=%s manifest=%s archive=%s\n", *tag, releaseManifestPath, prefixArchivePath)
@@ -387,23 +388,6 @@ func validate(args []string) error {
 	return nil
 }
 
-func writeReleaseManifest(inputPath string, outputPath string, archiveAssetName string) error {
-	doc, err := manifest.Load(inputPath)
-	if err != nil {
-		return err
-	}
-	if err := doc.Validate(); err != nil {
-		return err
-	}
-	for i := range doc.Artifacts {
-		if doc.Artifacts[i].Kind == "android-prefix-archive" {
-			doc.Artifacts[i].URL = archiveAssetName
-		}
-	}
-	doc.Notes = append(doc.Notes, "Artifact URLs in this release manifest are relative to the manifest location.")
-	return writeManifest(outputPath, doc)
-}
-
 func manifestPathValid(path string) error {
 	doc, err := manifest.Load(path)
 	if err != nil {
@@ -425,6 +409,7 @@ Assets:
 - %s
 - android-dev.manifest.json
 - zide-android-dev-prefix.tar.gz
+- zide-android-catalog-smoke.sh
 - %s
 
 Policy:
