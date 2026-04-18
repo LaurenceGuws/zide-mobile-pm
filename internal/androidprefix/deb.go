@@ -255,8 +255,6 @@ func rewriteTermuxBytes(relative string, payload []byte) ([]byte, bool, int, boo
 	}
 	if !looksText(payload) {
 		rewritten, rewrites := rewriteKnownBinaryTermuxPaths(payload)
-		rewritten, bridge := rewriteBinaryUSRRootToBridge(rewritten, oldPrefix)
-		rewrites += bridge
 		return rewritten, false, rewrites, bytes.Contains(rewritten, oldPrefix)
 	}
 	rewritten := bytes.ReplaceAll(payload, oldPrefix, []byte(AppUSRPath))
@@ -315,21 +313,6 @@ func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 		}
 	}
 	return rewritten, rewrites
-}
-
-// rewriteBinaryUSRRootToBridge replaces every "/data/data/com.termux/files/usr"
-// substring in a non-text payload with BinaryUSRBridgePath using
-// bytes.ReplaceAll (payload may grow). Known-path rules in
-// rewriteKnownBinaryTermuxPaths run first. This is a blunt ELF/.rodata edit:
-// upstream binaries must tolerate the length change; the Android consumer must
-// materialize BinaryUSRBridgePath as a symlink to the staged usr root.
-func rewriteBinaryUSRRootToBridge(payload []byte, oldPrefix []byte) ([]byte, int) {
-	n := bytes.Count(payload, oldPrefix)
-	if n == 0 {
-		return payload, 0
-	}
-	bridge := []byte(BinaryUSRBridgePath)
-	return bytes.ReplaceAll(payload, oldPrefix, bridge), n
 }
 
 func PruneTermuxPrefixedBinaries(stagingRoot string) (int, error) {
