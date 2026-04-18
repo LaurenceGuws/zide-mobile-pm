@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 const SchemaVersion = 1
@@ -136,6 +138,18 @@ func (doc Document) Validate() error {
 		if artifact.Size < 0 {
 			return fmt.Errorf("artifact[%d].size must be non-negative", i)
 		}
+		if artifact.Kind == "android-test-binary" {
+			if doc.Platform != "android" {
+				return fmt.Errorf("artifact[%d].kind android-test-binary is only valid for platform android", i)
+			}
+			rel := artifact.Metadata["install_relative_path"]
+			if rel == "" {
+				return fmt.Errorf("artifact[%d].metadata.install_relative_path must not be empty for android-test-binary", i)
+			}
+			if err := validateInstallRelativePath(rel); err != nil {
+				return fmt.Errorf("artifact[%d].metadata.install_relative_path: %w", i, err)
+			}
+		}
 		if isProviderDerivedKind(artifact.Kind) {
 			if err := validateProviderMetadata(i, artifact); err != nil {
 				return err
@@ -145,9 +159,23 @@ func (doc Document) Validate() error {
 	return nil
 }
 
+func validateInstallRelativePath(rel string) error {
+	if rel == "" {
+		return fmt.Errorf("path must not be empty")
+	}
+	if rel[0] == '/' {
+		return fmt.Errorf("path must be relative")
+	}
+	clean := filepath.ToSlash(filepath.Clean(rel))
+	if clean == "." || clean == ".." || strings.HasPrefix(clean, "../") || strings.Contains(clean, "/../") {
+		return fmt.Errorf("path must name a file under the prefix")
+	}
+	return nil
+}
+
 func isProviderDerivedKind(kind string) bool {
 	switch kind {
-	case "android-prefix-archive", "android-termux-package-index", "android-termux-deb":
+	case "android-prefix-archive", "android-termux-package-index", "android-termux-deb", "android-test-binary":
 		return true
 	default:
 		return false
