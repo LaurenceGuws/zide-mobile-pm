@@ -115,6 +115,80 @@ func TestPruneTermuxPrefixedBinaries(t *testing.T) {
 	}
 }
 
+func TestRewriteBinaryEmbeddedUSRPrefixMultipleOccurrences(t *testing.T) {
+	old := []byte("/data/data/com.termux/files/usr")
+	payload := append([]byte{0x7f, 'E', 'L', 'F', 0}, old...)
+	payload = append(payload, []byte("/lib/a\x00")...)
+	payload = append(payload, old...)
+	payload = append(payload, []byte("/lib/b\x00")...)
+
+	got, n := rewriteBinaryEmbeddedUSRPrefix(append([]byte(nil), payload...), old)
+	if n != 2 {
+		t.Fatalf("rewrites=%d want=2", n)
+	}
+	if bytes.Contains(got, old) {
+		t.Fatalf("legacy prefix remained: %q", got)
+	}
+	if bytes.Count(got, []byte(BinaryEmbeddedUSRPrefix)) != 2 {
+		t.Fatalf("expected two embed roots in %q", got)
+	}
+}
+
+func TestRewriteBinaryEmbeddedUSRPrefixSecondPassNoop(t *testing.T) {
+	old := []byte("/data/data/com.termux/files/usr")
+	payload := append([]byte{0x7f, 'E', 'L', 'F', 0}, old...)
+	payload = append(payload, []byte("/tail\x00")...)
+
+	once, n1 := rewriteBinaryEmbeddedUSRPrefix(append([]byte(nil), payload...), old)
+	twice, n2 := rewriteBinaryEmbeddedUSRPrefix(append([]byte(nil), once...), old)
+	if n1 != 1 || n2 != 0 {
+		t.Fatalf("first rewrites=%d second=%d want 1 then 0", n1, n2)
+	}
+	if !bytes.Equal(once, twice) {
+		t.Fatalf("second pass mutated payload")
+	}
+}
+
+func TestExtractDebUSRBinaryKnownThenBlanketForExtendedLibPath(t *testing.T) {
+	debPath := filepath.Join(t.TempDir(), "sample.deb")
+	elf := []byte{0x7f, 'E', 'L', 'F', 0}
+	body := append(elf, []byte("/data/data/com.termux/files/usr/var/htop/stat\x00")...)
+	body = append(body, []byte("/data/data/com.termux/files/usr/lib/extra.so\x00")...)
+	if err := writeSampleDeb(debPath, []sampleDebEntry{{
+		name:     "data/data/com.termux/files/usr/bin/demo",
+		mode:     0o755,
+		body:     body,
+		typeflag: tar.TypeReg,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+
+	stagingRoot := t.TempDir()
+	stats, err := ExtractDebUSR(debPath, stagingRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stats.BinaryRewrites < 2 {
+		t.Fatalf("binary rewrites=%d want>=2", stats.BinaryRewrites)
+	}
+	if len(stats.HardcodedTermuxHits) != 0 {
+		t.Fatalf("unexpected hits: %v", stats.HardcodedTermuxHits)
+	}
+	out, err := os.ReadFile(filepath.Join(stagingRoot, "usr/bin/demo"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(out, []byte("/data/data/com.termux/files/usr")) {
+		t.Fatalf("termux usr root remained: %q", out)
+	}
+	if !bytes.Contains(out, []byte("/data/user/0/uk.laurencegouws.zide/t/hs")) {
+		t.Fatalf("htop rewrite missing: %q", out)
+	}
+	if !bytes.Contains(out, []byte("/data/data/zide.embed/files/usr/lib/extra.so")) {
+		t.Fatalf("blanket rewrite for extended lib path missing: %q", out)
+	}
+}
+
 func TestReplaceFixedWidthCStringCStringOnlySkipsExtendedPath(t *testing.T) {
 	payload := []byte("/data/data/com.termux/files/usr/lib/extra\x00")
 	old := []byte("/data/data/com.termux/files/usr/lib")
