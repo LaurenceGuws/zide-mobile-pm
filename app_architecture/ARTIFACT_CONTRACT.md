@@ -127,6 +127,15 @@ Meaning:
 - a placeholder contract for future iOS-safe artifact bundles
 - not an executable userland promise
 
+## Product candidate channel (MP-A6)
+
+Product candidate materialization uses the **same** artifact kinds as dev
+(`android-prefix-archive`, etc.) but must use **`hardcoded_termux_policy=fail`**
+on the prefix artifact and hit counts consistent with the MP-A6 gate. Dev
+snapshot prereleases that use **`audit`** are not interchangeable with product
+claims. See `ANDROID_PRODUCT_PROVIDER_DECISION.md` and
+`docs/product-candidate/README.md`.
+
 ## Consumer Rule
 
 Consumers should treat manifests as immutable pinned inputs.

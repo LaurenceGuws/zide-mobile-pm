@@ -96,3 +96,24 @@ so the blocker list is inspectable without starting from audit-mode tarballs.
 The default dev package set is expected to **fail** this probe until MP-A6
 narrows inputs or changes provider payloads. That failure is **evidence**, not a
 tooling defect.
+
+## Materialize path (product-candidate outputs)
+
+When the probe **would pass**, operators (or automation) can materialize the
+same fail-policy build into **`dist/product-candidate/`** using:
+
+```bash
+go run ./cmd/zide-pm-admin android-product-candidate-materialize \
+  -manifest dist/android-dev.manifest.json
+```
+
+This is **`android-prefix-archive`** with **`hardcoded-policy=fail`** and default
+paths:
+
+- `dist/product-candidate/zide-android-prefix.tar.gz`
+- `dist/product-candidate/android-prefix.manifest.json`
+- `dist/product-candidate/prefix.audit.json`
+
+On failure, **`prefix.audit.json`** is still written (and the command exits
+non-zero) so the materialize step matches probe evidence. Operator notes live in
+`docs/product-candidate/README.md`.
