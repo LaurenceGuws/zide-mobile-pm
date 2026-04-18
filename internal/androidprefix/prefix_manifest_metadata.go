@@ -17,13 +17,13 @@ func PrefixArchiveRuntimeSupportFiles() string {
 
 // PrefixArchiveRuntimeSupportLinks returns the metadata.runtime_support_links
 // CSV for android-prefix-archive manifests. The first pair is always the
-// BinaryEmbeddedUSRPrefix bridge to AppUSRPath so it stays aligned with
-// rewriteBinaryEmbeddedUSRPrefix in deb.go.
+// BinaryUSRBridgePath symlink source mapped to AppUSRPath so it stays aligned
+// with rewriteBinaryUSRRootToBridge in deb.go.
 func PrefixArchiveRuntimeSupportLinks() string {
 	data := "/data/data/" + AppPackageName
 	userFiles := "/data/user/0/" + AppPackageName + "/files/usr"
 	parts := []string{
-		BinaryEmbeddedUSRPrefix + "=>" + AppUSRPath,
+		BinaryUSRBridgePath + "=>" + AppUSRPath,
 		RuntimeAliasDir + "/b=>" + userFiles + "/etc/bash.bashrc",
 		RuntimeAliasDir + "/p=>" + userFiles + "/etc/profile",
 		RuntimeAliasDir + "/h=>" + userFiles + "/etc/hosts",
