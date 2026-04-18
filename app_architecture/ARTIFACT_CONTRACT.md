@@ -131,6 +131,10 @@ Meaning:
 
 Consumers should treat manifests as immutable pinned inputs.
 
+Normative **`zide` runtime** obligations (staging, forbidden parsers, metadata
+fields used as version/compatibility truth) live in
+`ZIDE_MOBILE_ARTIFACT_CONSUMER.md`.
+
 `zide` should consume:
 
 - a manifest URL or local path
