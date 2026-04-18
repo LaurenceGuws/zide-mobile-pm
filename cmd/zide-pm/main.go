@@ -57,6 +57,10 @@ Commands:
 Current MVP package:
   dev-baseline    Bash + Neovim + Git + ripgrep + htop + gotop baseline.
 
+Android catalog (ZIDE_PM_HOST_PLATFORM=android):
+  android-test-binary artifacts from the manifest are listed and installable as
+  additional package names (host-side runs keep this catalog off by default).
+
 Examples:
   zide-pm doctor
   zide-pm list-available
@@ -74,6 +78,7 @@ func doctor(args []string) error {
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
+	fmt.Printf("zide_pm_host_platform=%s\n", zidepm.CurrentHostPlatform())
 	source, err := loadSource(*manifestPath)
 	if err != nil {
 		return doctorInstalled(*prefix, err)
@@ -127,9 +132,6 @@ func install(args []string) error {
 		return fmt.Errorf("install expects exactly one package")
 	}
 	pkg := fs.Arg(0)
-	if pkg != zidepm.DevBaselinePackage {
-		return fmt.Errorf("unsupported MVP package %q; supported: %s", pkg, zidepm.DevBaselinePackage)
-	}
 	if strings.TrimSpace(*prefix) == "" {
 		return fmt.Errorf("--prefix is required")
 	}
@@ -140,7 +142,12 @@ func install(args []string) error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
-	result, err := zidepm.InstallDevBaseline(ctx, source, *prefix, *cacheDir)
+	var result zidepm.InstallResult
+	if pkg == zidepm.DevBaselinePackage {
+		result, err = zidepm.InstallDevBaseline(ctx, source, *prefix, *cacheDir)
+	} else {
+		result, err = zidepm.InstallAndroidTestBinary(ctx, source, pkg, *prefix, *cacheDir)
+	}
 	if err != nil {
 		return err
 	}
@@ -163,6 +170,7 @@ func doctorInstalled(prefix string, manifestErr error) error {
 	if err != nil {
 		return fmt.Errorf("manifest unavailable (%v) and no install stamp at prefix %q: %w", manifestErr, prefix, err)
 	}
+	fmt.Printf("zide_pm_host_platform=%s\n", zidepm.CurrentHostPlatform())
 	fmt.Printf("manifest=%s\n", stamp.Manifest)
 	fmt.Printf("installed=true\n")
 	fmt.Printf("package=%s\n", stamp.Package)
