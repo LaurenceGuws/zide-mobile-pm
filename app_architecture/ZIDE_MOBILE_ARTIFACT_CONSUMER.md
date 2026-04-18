@@ -73,6 +73,11 @@ for MP-A7 alignment with real manifests):
 | `extracted_*` / `archive_*` | File/symlink counts from build vs archive |
 | `zide_pm_cli` | Whether `usr/bin/zide-pm` was bundled (`included` when set) |
 
+**Dash-style binary rewrites** add short aliases under
+`/data/data/uk.laurencegouws.zide/` (`ul`, `ub`, `b`, `u/bsh`) that appear in
+`runtime_support_links` on newly emitted prefix manifests; materialize them with
+the same rules as other `source=>target` pairs.
+
 `zide` should treat unknown metadata keys as **opaque** unless this contract or
 `ARTIFACT_CONTRACT.md` promotes them; do not infer provider package-manager
 behavior from them.
