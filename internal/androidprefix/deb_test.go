@@ -115,6 +115,19 @@ func TestPruneTermuxPrefixedBinaries(t *testing.T) {
 	}
 }
 
+func TestReplaceFixedWidthCStringCStringOnlySkipsExtendedPath(t *testing.T) {
+	payload := []byte("/data/data/com.termux/files/usr/lib/extra\x00")
+	old := []byte("/data/data/com.termux/files/usr/lib")
+	newPath := []byte("/data/data/uk.laurencegouws.zide/ul")
+	got, changed := replaceFixedWidthCString(append([]byte(nil), payload...), old, newPath, true)
+	if changed {
+		t.Fatal("expected no rewrite when '/' follows usr/lib")
+	}
+	if string(got) != string(payload) {
+		t.Fatalf("payload mutated: %q", got)
+	}
+}
+
 func TestExtractDebUSRAuditsUnknownBinaryTermuxPaths(t *testing.T) {
 	debPath := filepath.Join(t.TempDir(), "sample.deb")
 	body := append([]byte{0x7f, 'E', 'L', 'F', 0}, []byte("/data/data/com.termux/files/usr/lib/unknown")...)
