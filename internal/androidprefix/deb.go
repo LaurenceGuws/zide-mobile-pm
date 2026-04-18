@@ -22,7 +22,18 @@ const (
 	AppPackageName  = "uk.laurencegouws.zide"
 	AppUSRPath      = "/data/data/" + AppPackageName + "/files/usr"
 	RuntimeAliasDir = "/data/user/0/" + AppPackageName + "/t"
+	// BinaryEmbeddedUSRPrefix is exactly as wide as "/data/data/com.termux/files/usr"
+	// so ELF .rodata slots stay stable. Prefix archive manifests must advertise a
+	// runtime_support_links entry mapping this path to AppUSRPath.
+	BinaryEmbeddedUSRPrefix = "/data/data/zide.embed/files/usr"
 )
+
+func init() {
+	const termuxEmbeddedUSR = "/data/data/com.termux/files/usr"
+	if len(BinaryEmbeddedUSRPrefix) != len(termuxEmbeddedUSR) {
+		panic("androidprefix: BinaryEmbeddedUSRPrefix width must match legacy Termux embedded usr root")
+	}
+}
 
 type ExtractStats struct {
 	Entries             int
@@ -249,6 +260,8 @@ func rewriteTermuxBytes(relative string, payload []byte) ([]byte, bool, int, boo
 	}
 	if !looksText(payload) {
 		rewritten, rewrites := rewriteKnownBinaryTermuxPaths(payload)
+		rewritten, blanket := rewriteBinaryEmbeddedUSRPrefix(rewritten, oldPrefix)
+		rewrites += blanket
 		return rewritten, false, rewrites, bytes.Contains(rewritten, oldPrefix)
 	}
 	rewritten := bytes.ReplaceAll(payload, oldPrefix, []byte(AppUSRPath))
@@ -307,6 +320,28 @@ func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 		}
 	}
 	return rewritten, rewrites
+}
+
+// rewriteBinaryEmbeddedUSRPrefix swaps every legacy Termux usr root substring in
+// a binary payload for BinaryEmbeddedUSRPrefix (same width). Known-path rules in
+// rewriteKnownBinaryTermuxPaths run first so longer literals still rewrite to
+// their dedicated targets.
+func rewriteBinaryEmbeddedUSRPrefix(payload []byte, oldPrefix []byte) ([]byte, int) {
+	newPrefix := []byte(BinaryEmbeddedUSRPrefix)
+	out := payload
+	n := 0
+	search := 0
+	for {
+		idx := bytes.Index(out[search:], oldPrefix)
+		if idx < 0 {
+			break
+		}
+		start := search + idx
+		copy(out[start:start+len(oldPrefix)], newPrefix)
+		search = start + len(oldPrefix)
+		n++
+	}
+	return out, n
 }
 
 func PruneTermuxPrefixedBinaries(stagingRoot string) (int, error) {

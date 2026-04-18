@@ -128,7 +128,7 @@ func TestReplaceFixedWidthCStringCStringOnlySkipsExtendedPath(t *testing.T) {
 	}
 }
 
-func TestExtractDebUSRAuditsUnknownBinaryTermuxPaths(t *testing.T) {
+func TestExtractDebUSRRewritesUnknownBinaryTermuxUSRPrefix(t *testing.T) {
 	debPath := filepath.Join(t.TempDir(), "sample.deb")
 	body := append([]byte{0x7f, 'E', 'L', 'F', 0}, []byte("/data/data/com.termux/files/usr/lib/unknown")...)
 	if err := writeSampleDeb(debPath, []sampleDebEntry{{
@@ -140,15 +140,27 @@ func TestExtractDebUSRAuditsUnknownBinaryTermuxPaths(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	stats, err := ExtractDebUSR(debPath, t.TempDir())
+	stagingRoot := t.TempDir()
+	stats, err := ExtractDebUSR(debPath, stagingRoot)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if stats.BinaryRewrites != 0 {
-		t.Fatalf("binary rewrites=%d want=0", stats.BinaryRewrites)
+	if stats.BinaryRewrites < 1 {
+		t.Fatalf("binary rewrites=%d want>=1", stats.BinaryRewrites)
 	}
-	if got, want := stats.HardcodedTermuxHits, []string{"usr/bin/unknown"}; len(got) != len(want) || got[0] != want[0] {
-		t.Fatalf("hardcoded hits=%v want=%v", got, want)
+	if len(stats.HardcodedTermuxHits) != 0 {
+		t.Fatalf("unexpected hardcoded hits: %v", stats.HardcodedTermuxHits)
+	}
+
+	rewritten, err := os.ReadFile(filepath.Join(stagingRoot, "usr/bin/unknown"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(rewritten, []byte("/data/data/com.termux/files/usr")) {
+		t.Fatalf("termux usr root remained in binary: %q", rewritten)
+	}
+	if !bytes.Contains(rewritten, []byte("/data/data/zide.embed/files/usr")) {
+		t.Fatalf("embed usr root missing from binary: %q", rewritten)
 	}
 }
 
