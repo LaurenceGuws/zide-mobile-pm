@@ -258,10 +258,17 @@ func rewriteTermuxBytes(relative string, payload []byte) ([]byte, bool, int, boo
 func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 	rewritten := append([]byte(nil), payload...)
 	rewrites := 0
+	// Longest old strings first so paths that share prefixes (e.g. usr/bin vs
+	// usr/bin/sh) rewrite without corrupting longer C strings.
 	for _, replacement := range []struct {
-		old string
-		new string
+		old         string
+		new         string
+		cStringOnly bool
 	}{
+		{
+			old: "/data/data/com.termux/files/usr/bin/sh",
+			new: "/data/data/uk.laurencegouws.zide/u/bsh",
+		},
 		{
 			old: "/data/data/com.termux/files/usr/etc/bash.bashrc",
 			new: RuntimeAliasDir + "/b",
@@ -278,8 +285,22 @@ func rewriteKnownBinaryTermuxPaths(payload []byte) ([]byte, int) {
 			old: "/data/data/com.termux/files/usr/var/htop/stat",
 			new: RuntimeAliasDir + "/hs",
 		},
+		{
+			old: "RfPATH=/data/data/com.termux/files/usr/bin",
+			new: "RfPATH=/data/data/uk.laurencegouws.zide/b",
+		},
+		{
+			old:         "/data/data/com.termux/files/usr/lib",
+			new:         "/data/data/uk.laurencegouws.zide/ul",
+			cStringOnly: true,
+		},
+		{
+			old:         "/data/data/com.termux/files/usr/bin",
+			new:         "/data/data/uk.laurencegouws.zide/ub",
+			cStringOnly: true,
+		},
 	} {
-		next, changed := replaceFixedWidthCString(rewritten, []byte(replacement.old), []byte(replacement.new))
+		next, changed := replaceFixedWidthCString(rewritten, []byte(replacement.old), []byte(replacement.new), replacement.cStringOnly)
 		if changed {
 			rewrites++
 			rewritten = next
@@ -312,7 +333,7 @@ func PruneTermuxPrefixedBinaries(stagingRoot string) (int, error) {
 	return removed, nil
 }
 
-func replaceFixedWidthCString(payload []byte, old []byte, new []byte) ([]byte, bool) {
+func replaceFixedWidthCString(payload []byte, old []byte, new []byte, cStringOnly bool) ([]byte, bool) {
 	if len(new) > len(old) {
 		return payload, false
 	}
@@ -324,6 +345,13 @@ func replaceFixedWidthCString(payload []byte, old []byte, new []byte) ([]byte, b
 			break
 		}
 		start := searchFrom + index
+		if cStringOnly {
+			end := start + len(old)
+			if end < len(payload) && payload[end] != 0 {
+				searchFrom = start + 1
+				continue
+			}
+		}
 		copy(payload[start:start+len(new)], new)
 		for i := start + len(new); i < start+len(old); i++ {
 			payload[i] = 0
