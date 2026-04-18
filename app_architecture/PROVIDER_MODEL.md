@@ -57,6 +57,20 @@ dependency strings, repository names, or extraction rules.
 Consumers should use provider metadata for provenance and compatibility checks,
 not to infer runtime package-manager behavior.
 
+## Dev snapshot channel (interim)
+
+Until **MP-A6** closes with a product provider decision, the **authoritative
+dev consumer manifest** for Zide Android bringup is whatever `android-dev-*`
+GitHub prerelease `zide-pm-admin android-dev-snapshot-release` publishes most
+recently. That lane always snapshots `termux-main`, materializes a prefix
+archive under **hardcoded-prefix policy `audit`**, and ships the release-local
+`android-dev-prefix.release.manifest.json` plus audit metadata.
+
+`zide-pm` defaults to the latest published dev release manifest URL in code
+(`DefaultAndroidDevManifestURL`). Product channels must not treat audit-mode
+artifacts as product-clean; they remain development/bootstrap inputs under the
+provider model above.
+
 ## Product Rule
 
 Zide consumes artifact contracts, not provider internals.

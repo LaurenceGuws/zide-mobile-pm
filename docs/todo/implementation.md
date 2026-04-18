@@ -154,6 +154,11 @@ Boundary:
 
 ### MP-A6 Android Product Provider Decision
 
+Interim dev channel authority: `termux-main` via `android-dev-snapshot-release`
+(audit policy) remains the pinned bootstrap path until this ticket selects the
+product provider. Latest published dev snapshot tag recorded under
+`docs/releases/`.
+
 ## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`
