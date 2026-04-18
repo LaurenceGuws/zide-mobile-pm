@@ -207,6 +207,12 @@ Executable gate (**MP-A6-probe**):
   with **`hardcoded-policy=fail`** and records audit output (default
   `dist/mp-a6-product-candidate.audit.json` on failure) for MP-A6 evidence.
 
+Materialize path (**MP-A6-materialize**):
+
+- `zide-pm-admin android-product-candidate-materialize` runs the same fail-policy
+  archive build and writes **`dist/product-candidate/*`** on success (operator
+  doc: `docs/product-candidate/README.md`).
+
 ## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`
@@ -227,7 +233,8 @@ Groundwork (**MP-A7-doc**):
 - `app_architecture/ZIDE_MOBILE_ARTIFACT_CONSUMER.md` states allowed manifest
   inputs, required staging/verification behavior, forbidden package-internal
   parsers, and which metadata fields constitute version/compatibility truth for
-  the Zig/runtime consumer.
+  the Zig/runtime consumer (including top-level manifest document fields aligned
+  with emitted JSON).
 
 Acceptance:
 

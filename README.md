@@ -61,6 +61,7 @@ go run ./cmd/zide-pm-admin android-dev-manifest
 go run ./cmd/zide-pm-admin android-prefix-archive -hardcoded-policy audit
 go run ./cmd/zide-pm-admin android-dev-snapshot-release -dry-run
 go run ./cmd/zide-pm-admin android-product-candidate-probe
+go run ./cmd/zide-pm-admin android-product-candidate-materialize
 go run ./cmd/zide-pm-admin validate examples/android-dev.manifest.json
 ```
 

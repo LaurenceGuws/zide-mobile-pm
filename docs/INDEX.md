@@ -26,5 +26,6 @@ Doc scope:
 - `README.md` is the public project summary.
 - `app_architecture/` is current technical authority.
 - `docs/todo/` is the execution queue.
+- `docs/product-candidate/` — MP-A6 product-candidate operator path (fail policy).
 - `docs/research/` is for evidence and investigations.
 - `docs/releases/` is for release notes once artifacts are published.
