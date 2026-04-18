@@ -69,6 +69,9 @@ packages alongside `dev-baseline`. Without this variable (typical developer
 machine runs), the test-binary catalog stays hidden so host workflows do not
 accidentally claim Android-only install semantics.
 
+Published Android dev snapshot manifests include `zide-android-catalog-smoke`
+(`android-test-binary`) so devices can validate pull/install without ad-hoc URLs.
+
 `zide-pm doctor` prints `zide_pm_host_platform` so operators can see which mode
 is active.
 

@@ -23,6 +23,7 @@ Dev snapshot release assets:
 - `android-dev-prefix.release.manifest.json`
 - `android-dev.manifest.json`
 - `zide-android-dev-prefix.tar.gz`
+- `zide-android-catalog-smoke.sh` (pinned `android-test-binary` for catalog mode)
 - `zide-android-dev-prefix.audit.json`
 
 The prefix archive includes the Android `zide-pm` binary and a package install

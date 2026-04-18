@@ -97,7 +97,9 @@ binary rules, and those rewrites are reported separately from text rewrites.
 `android-dev-snapshot-release` automates the fast Android development snapshot
 prerelease lane. It generates
 the dev manifest and prefix archive in audit mode, rewrites the release manifest
-so the archive URL is relative to the manifest location, creates a tag, and
+so the archive URL is relative to the manifest location, adds a pinned
+`android-test-binary` (`zide-android-catalog-smoke`) for catalog-mode validation,
+creates a tag, and
 publishes a GitHub prerelease with the generated assets. Use `-dry-run` to
 prepare assets without publishing.
 

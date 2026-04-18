@@ -127,6 +127,13 @@ Boundary:
 - no Java/Android UI or app lifecycle code in this repo
 - product naming remains `zide-pm` / `zide-pm-admin` only
 
+Follow-on:
+
+- `android-dev-snapshot-release` now materializes `assets/zide-android-catalog-smoke.sh`,
+  appends artifact `zide-android-catalog-smoke` (`android-test-binary`) to the
+  published `android-dev-prefix.release.manifest.json`, and uploads the payload
+  as `zide-android-catalog-smoke.sh` on the same GitHub prerelease.
+
 ### MP-A5 Android zide-pm Staging — met
 
 Result:
