@@ -115,3 +115,7 @@ here unless it is generated artifact metadata.
 
 If code builds, verifies, signs, snapshots, or publishes mobile artifacts, it
 belongs here unless it is still a short-lived probe.
+
+MP-A6 product-candidate tooling (`android-product-candidate-*`) and operator
+notes (`docs/product-candidate/`) live in this repo as **host-side** artifact
+discipline, not app runtime code.
