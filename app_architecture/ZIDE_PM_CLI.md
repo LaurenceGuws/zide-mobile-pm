@@ -75,6 +75,19 @@ Published Android dev snapshot manifests include `zide-android-catalog-smoke`
 `zide-pm doctor` prints `zide_pm_host_platform` so operators can see which mode
 is active.
 
+## Android networking (MP-A10 / APX-B18)
+
+The shipped `zide-pm` binary is built with `CGO_ENABLED=0`. On some Android app
+sandboxes, `/etc/resolv.conf` advertises a loopback nameserver (for example
+`[::1]:53`) that the Go resolver cannot reach from the APK process, so manifest
+and artifact downloads fail even when system `ping github.com` works.
+
+On `GOOS=android`, `zide-pm` installs a `net.DefaultResolver` dial hook that
+ignores that loopback entry, prefers `getprop net.dns1` (then `net.dns2`… from
+`/system/bin/getprop` when present), and otherwise falls back to `8.8.8.8:53`.
+This is automatic bootstrap DNS for HTTPS fetches—operators should not need to
+patch resolver files or rely on root.
+
 ## Boundary
 
 `zide-pm` consumes manifests and prefix archives. It does not parse `.deb`

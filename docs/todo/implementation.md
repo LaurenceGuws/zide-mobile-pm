@@ -222,6 +222,12 @@ Concrete input (**MP-A6-dash-minimal**):
   Android sandbox materialization) plus manifest `runtime_support_links`; product
   acceptance is still tracked separately in `ANDROID_PRODUCT_PROVIDER_DECISION.md`.
 
+### MP-A10 Android in-prefix zide-pm networking (APX-B18)
+
+- `internal/zidepm/resolver_android.go` wires Android-only DNS bootstrap for
+  GitHub manifest/archive fetches (`getprop net.dns*` then `8.8.8.8:53`).
+- Authority: `app_architecture/ZIDE_PM_CLI.md` § Android networking.
+
 ## Next Tickets
 
 Decide whether Android product prefixes come from the current `termux-main`
